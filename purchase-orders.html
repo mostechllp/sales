@@ -51,7 +51,7 @@
       --card-border: 1px solid rgba(0, 0, 0, 0.03);
       --indigo: #5c6bc0;
       --indigo-dark: #3949ab;
-      --indigo-light: rgba(92,107,192,0.12);
+      --indigo-light: rgba(92, 107, 192, 0.12);
     }
 
     [data-theme="dark"] {
@@ -607,36 +607,85 @@
 
     /* ── PIPELINE BANNER ── */
     .pipeline {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 20px 28px;
-      margin-bottom: 28px; overflow-x: auto;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 28px;
+      margin-bottom: 28px;
+      overflow-x: auto;
     }
+
     .pipeline-inner {
-      display: flex; align-items: center; gap: 0;
+      display: flex;
+      align-items: center;
+      gap: 0;
       min-width: 600px;
     }
+
     .pipe-step {
-      display: flex; flex-direction: column; align-items: center;
-      flex: 1; position: relative; cursor: default;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+      position: relative;
+      cursor: default;
     }
+
     .pipe-dot {
-      width: 38px; height: 38px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 15px; font-weight: 700; margin-bottom: 8px;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 8px;
       border: 2px solid var(--border);
-      background: var(--surface2); color: var(--muted);
+      background: var(--surface2);
+      color: var(--muted);
       transition: all 0.3s;
     }
-    .pipe-step.done   .pipe-dot { background: var(--green);  color: #fff; border-color: var(--green); }
-    .pipe-step.active .pipe-dot { background: var(--indigo); color: #fff; border-color: var(--indigo); box-shadow: 0 0 0 4px rgba(92,107,192,0.2); }
-    .pipe-label { font-size: 11px; font-weight: 600; color: var(--muted); text-align: center; }
-    .pipe-step.done   .pipe-label { color: var(--green); }
-    .pipe-step.active .pipe-label { color: var(--indigo); }
-    .pipe-line {
-      flex: 1; height: 2px; background: var(--border);
-      margin-bottom: 22px; transition: background 0.3s;
+
+    .pipe-step.done .pipe-dot {
+      background: var(--green);
+      color: #fff;
+      border-color: var(--green);
     }
-    .pipe-line.done { background: var(--green); }
+
+    .pipe-step.active .pipe-dot {
+      background: var(--indigo);
+      color: #fff;
+      border-color: var(--indigo);
+      box-shadow: 0 0 0 4px rgba(92, 107, 192, 0.2);
+    }
+
+    .pipe-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .pipe-step.done .pipe-label {
+      color: var(--green);
+    }
+
+    .pipe-step.active .pipe-label {
+      color: var(--indigo);
+    }
+
+    .pipe-line {
+      flex: 1;
+      height: 2px;
+      background: var(--border);
+      margin-bottom: 22px;
+      transition: background 0.3s;
+    }
+
+    .pipe-line.done {
+      background: var(--green);
+    }
 
     @media (max-width: 900px) {
       .header {
@@ -804,34 +853,34 @@
             <p>Create, assign vendors & track all orders</p>
           </div>
           <!-- ORDER PIPELINE -->
-      <div class="pipeline">
-        <div class="pipeline-inner">
-          <div class="pipe-step active">
-            <div class="pipe-dot"><i class="fas fa-cart-shopping"></i></div>
-            <div class="pipe-label">Sales</div>
+          <div class="pipeline">
+            <div class="pipeline-inner">
+              <div class="pipe-step active">
+                <div class="pipe-dot"><i class="fas fa-cart-shopping"></i></div>
+                <div class="pipe-label">Sales</div>
+              </div>
+              <div class="pipe-line "></div>
+              <div class="pipe-step ">
+                <div class="pipe-dot"><i class="fas fa-file-invoice-dollar"></i></div>
+                <div class="pipe-label">Finance</div>
+              </div>
+              <div class="pipe-line "></div>
+              <div class="pipe-step ">
+                <div class="pipe-dot"><i class="fas fa-boxes-stacked"></i></div>
+                <div class="pipe-label">Procurement</div>
+              </div>
+              <div class="pipe-line "></div>
+              <div class="pipe-step">
+                <div class="pipe-dot"><i class="fas fa-truck-fast"></i></div>
+                <div class="pipe-label">Logistics</div>
+              </div>
+              <div class="pipe-line"></div>
+              <div class="pipe-step" id="finalPipeStep">
+                <div class="pipe-dot"><i class="fas fa-circle-check"></i></div>
+                <div class="pipe-label">Delivered</div>
+              </div>
+            </div>
           </div>
-          <div class="pipe-line "></div>
-          <div class="pipe-step ">
-            <div class="pipe-dot"><i class="fas fa-file-invoice-dollar"></i></div>
-            <div class="pipe-label">Finance</div>
-          </div>
-          <div class="pipe-line "></div>
-          <div class="pipe-step ">
-            <div class="pipe-dot"><i class="fas fa-boxes-stacked"></i></div>
-            <div class="pipe-label">Procurement</div>
-          </div>
-          <div class="pipe-line "></div>
-          <div class="pipe-step">
-            <div class="pipe-dot"><i class="fas fa-truck-fast"></i></div>
-            <div class="pipe-label">Logistics</div>
-          </div>
-          <div class="pipe-line"></div>
-          <div class="pipe-step" id="finalPipeStep">
-            <div class="pipe-dot"><i class="fas fa-circle-check"></i></div>
-            <div class="pipe-label">Delivered</div>
-          </div>
-        </div>
-      </div>
           <div class="table-container">
             <div class="table-header"><button class="add-btn" onclick="openCreatePOModal()"><i class="fas fa-plus"></i> Create PO</button>
               <div class="search-box"><i class="fas fa-search"></i><input type="text" id="searchPOInput" placeholder="Search by PO, item, vendor, customer..." onkeyup="filterPurchaseOrders()"></div>
@@ -844,6 +893,7 @@
                     <th>Item</th>
                     <th>Qty</th>
                     <th>Total (AED)</th>
+                    <th>Attachment</th>
                     <th>Status</th>
                     <th>Vendor/Manufacturer</th>
                     <th>Customer</th>
@@ -868,6 +918,12 @@
       <div class="form-row">
         <div><input type="number" id="poQuantity" placeholder="Quantity *"></div>
         <div><input type="number" id="poPrice" placeholder="Unit Price (AED) *"></div>
+        <label class="file-upload-label">
+          <i class="fas fa-paperclip"></i> Attach File (Optional)
+          <input type="file" id="poAttachment" style="display:none;" onchange="handlePOAttachment(event)">
+        </label>
+
+        <div id="attachmentStatus" style="font-size:12px; margin-bottom:12px;"></div>
       </div>
       <div class="modal-buttons"><button class="cancel" onclick="closeCreatePOModal()">Cancel</button><button class="confirm" onclick="createPurchaseOrder()">Create & Download PDF</button></div>
     </div>
@@ -1003,6 +1059,23 @@
       return idx < statusFlow.length - 1 ? statusFlow[idx + 1] : s;
     }
 
+    let poAttachmentData = null;
+
+    function handlePOAttachment(event) {
+      let file = event.target.files[0];
+
+      if (file) {
+        let url = URL.createObjectURL(file);
+        poAttachmentData = url;
+
+        document.getElementById('attachmentStatus').innerHTML =
+          `<i class="fas fa-check-circle"></i> ${file.name} attached`;
+      } else {
+        poAttachmentData = null;
+        document.getElementById('attachmentStatus').innerHTML = '';
+      }
+    }
+
     function escapeHtml(text) {
       if (!text) return '';
       return String(text).replace(/[&<>]/g, m => ({
@@ -1021,6 +1094,13 @@
           <td>${escapeHtml(po.item)}</td>
           <td>${po.quantity}</td>
           <td>AED ${po.total.toLocaleString()}</td>
+          <td>
+  ${po.attachment 
+    ? `<a href="${po.attachment}" target="_blank" style="color:var(--blue);">
+         <i class="fas fa-paperclip"></i> View
+       </a>` 
+    : '—'}
+</td>
           <td><span class="status-badge status-${po.status}">${statusLabels[po.status]}</span></td>
           <td>${po.vendor || '—'}</td>
           <td>${po.customer || '—'}</td>
@@ -1108,6 +1188,7 @@
         assignDate: null,
         paymentOption: null,
         pdfBlobUrl: null,
+        attachment: poAttachmentData,
         createdAt: new Date().toISOString()
       };
       let pdfUrl = generatePDF(newPO);
@@ -1133,6 +1214,9 @@
       document.getElementById('poItem').value = '';
       document.getElementById('poQuantity').value = '';
       document.getElementById('poPrice').value = '';
+      poAttachmentData = null;
+      document.getElementById('poAttachment').value = '';
+      document.getElementById('attachmentStatus').innerHTML = '';
     }
 
     function openAssignVendorModal(poId) {
