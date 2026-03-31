@@ -516,12 +516,17 @@
 
     .form-row {
       display: flex;
-      gap: 12px;
-      margin-bottom: 0;
+      gap: 16px;
     }
 
     .form-row>div {
       flex: 1;
+      min-width: 0;
+    }
+
+    .modal-content input {
+      width: 100%;
+      font-size: 14px;
     }
 
     .modal-buttons {
@@ -914,17 +919,19 @@
   <!-- Modals -->
   <div id="createPOModal" class="modal">
     <div class="modal-content">
-      <h3><i class="fas fa-plus-circle"></i> Create Purchase Order</h3><input type="text" id="poItem" placeholder="Item name *">
+
+      <h3><i class="fas fa-plus-circle"></i> Create Purchase Order</h3>
+      <input type="text" id="poNumberInput" placeholder="PO Number *">
+      <input type="text" id="poItem" placeholder="Item name *">
       <div class="form-row">
         <div><input type="number" id="poQuantity" placeholder="Quantity *"></div>
         <div><input type="number" id="poPrice" placeholder="Unit Price (AED) *"></div>
-        <label class="file-upload-label">
-          <i class="fas fa-paperclip"></i> Attach File (Optional)
-          <input type="file" id="poAttachment" style="display:none;" onchange="handlePOAttachment(event)">
-        </label>
-
-        <div id="attachmentStatus" style="font-size:12px; margin-bottom:12px;"></div>
       </div>
+
+      <label class="file-upload-label">
+        <i class="fas fa-paperclip"></i> Attach File (Optional)
+        <input type="file" id="poAttachment" style="display:none;" onchange="handlePOAttachment(event)">
+      </label>
       <div class="modal-buttons"><button class="cancel" onclick="closeCreatePOModal()">Cancel</button><button class="confirm" onclick="createPurchaseOrder()">Create & Download PDF</button></div>
     </div>
   </div>
@@ -933,17 +940,14 @@
     <div class="modal-content">
       <h3><i class="fas fa-handshake"></i> Assign to Vendor & Upload PDF</h3><select id="vendorType">
         <option value="">Select Manufacturer/Vendor *</option>
-        <option value="ABC Electronics">ABC Electronics</option>
-        <option value="Tech Solutions LLC">Tech Solutions LLC</option>
-        <option value="Global Traders FZE">Global Traders FZE</option>
-        <option value="John Smith (Sales)">John Smith (Sales)</option>
-        <option value="Sarah Ahmed">Sarah Ahmed</option>
+        <option value="Piramal">Piramal</option>
+        <option value="Conturavet">Conturavet</option>
+        <option value="Univet">Univet</option>
       </select><select id="customerType">
         <option value="">Select Customer *</option>
-        <option value="Company A">Company A</option>
-        <option value="Company B">Company B</option>
-        <option value="Retail Store 1">Retail Store 1</option>
-        <option value="Wholesale Corp">Wholesale Corp</option>
+        <option value="AB Pharma Ethiopia">AB Pharma Ethiopia</option>
+        <option value="BC Pharma">BC Pharma</option>
+        <option value="CD Pharma">CD Pharma</option>
       </select><input type="date" id="assignDate"><select id="paymentOption">
         <option value="">Payment Option *</option>
         <option value="Advance Payment">Advance Payment</option>
@@ -987,13 +991,13 @@
         purchaseOrders = [{
             id: 1,
             poNumber: 'PO-2024-001',
-            item: 'Laptop Computers',
-            quantity: 10,
-            price: 2500,
-            total: 25000,
+            item: 'Sevoflurane',
+            quantity: 1000,
+            price: 985,
+            total: 985000,
             status: 'finance',
-            vendor: 'ABC Electronics',
-            customer: 'Company A',
+            vendor: 'Piramal',
+            customer: 'AB Pharma Ethiopia',
             assignDate: '2024-03-26',
             paymentOption: 'Bank Transfer',
             pdfBlobUrl: null,
@@ -1002,13 +1006,13 @@
           {
             id: 2,
             poNumber: 'PO-2024-002',
-            item: 'Office Chairs',
+            item: 'Isoflurane',
             quantity: 25,
             price: 450,
             total: 11250,
             status: 'procurement',
-            vendor: 'Tech Solutions LLC',
-            customer: 'Company B',
+            vendor: 'Piramal',
+            customer: 'BC Pharma',
             assignDate: '2024-03-27',
             paymentOption: 'Advance Payment',
             pdfBlobUrl: null,
@@ -1017,7 +1021,7 @@
           {
             id: 3,
             poNumber: 'PO-2024-003',
-            item: 'Printers',
+            item: 'Arthramid',
             quantity: 5,
             price: 1200,
             total: 6000,
@@ -1173,8 +1177,13 @@
         quantity = parseInt(document.getElementById('poQuantity').value),
         price = parseFloat(document.getElementById('poPrice').value);
       if (!item || !quantity || !price) return alert('Fill all fields');
-      let total = quantity * price,
-        poNumber = `PO-${new Date().getFullYear()}-${String(purchaseOrders.length + 1).padStart(3, '0')}`;
+      let poNumber = document.getElementById('poNumberInput').value.trim();
+
+      if (!poNumber) return alert('PO Number is required');
+      let exists = purchaseOrders.some(po => po.poNumber === poNumber);
+      if (exists) return alert('PO Number already exists');
+
+      let total = quantity * price;
       let newPO = {
         id: Date.now(),
         poNumber,
@@ -1211,6 +1220,7 @@
 
     function closeCreatePOModal() {
       document.getElementById('createPOModal').classList.remove('active');
+      document.getElementById('poNumberInput').value = '';
       document.getElementById('poItem').value = '';
       document.getElementById('poQuantity').value = '';
       document.getElementById('poPrice').value = '';
