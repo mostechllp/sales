@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+  <title>Sales Manager | Purchase Orders</title>
+  <meta name="theme-color" content="#2ecc71">
+  <!-- Google Fonts: Poppins + Inter for modern feel -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- Chart.js v4 -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <!-- jsPDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    :root {
+      --green: #2ecc71;
+      --green-dark: #1a9e52;
+      --green-light: #d4f7e4;
+      --green-glow: rgba(46, 204, 113, 0.12);
+      --red: #e74c3c;
+      --amber: #f39c12;
+      --blue: #3498db;
+      --purple: #9b59b6;
+      --yellow: #f1c40f;
+      --yellow-light: #fff9e6;
+      --orange: #e67e22;
+
+      --bg: #f4f7f5;
+      --surface: #ffffff;
+      --surface2: #f0f4f1;
+      --border: #e2ebe5;
+      --text: #1a2e22;
+      --text-secondary: #4a5f52;
+      --muted: #7a9486;
+      --sidebar-bg: #1a2e22;
+      --sidebar-text: rgba(255, 255, 255, 0.7);
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+      --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.12);
+      --radius: 20px;
+      --radius-sm: 12px;
+      --card-border: 1px solid rgba(0, 0, 0, 0.03);
+    }
+
+    [data-theme="dark"] {
+      --bg: #0f1412;
+      --surface: #1a241f;
+      --surface2: #1f2c26;
+      --border: #2a3a32;
+      --text: #ecfdf5;
+      --text-secondary: #b8d9cc;
+      --muted: #7e9a8c;
+      --sidebar-bg: #0a100e;
+      --sidebar-text: rgba(255, 255, 255, 0.65);
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    body {
+      font-family: 'Inter', 'Poppins', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      transition: background 0.3s, color 0.3s;
+      overflow-x: hidden;
+    }
+
+    .app {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: 72px;
+      background: var(--sidebar-bg);
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      z-index: 200;
+      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .sidebar:hover {
+      width: 260px;
+    }
+
+    .sidebar-logo {
+      padding: 20px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .logo-img {
+      width: 42px;
+      height: 42px;
+      object-fit: contain;
+      border-radius: 12px;
+      background: white;
+      padding: 5px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 20px;
+      margin: 4px 8px;
+      border-radius: 14px;
+      color: var(--sidebar-text);
+      font-weight: 500;
+      font-size: 14px;
+      transition: all 0.2s;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .nav-item i {
+      width: 24px;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .nav-item span {
+      opacity: 0;
+      transition: opacity 0.2s 0.05s;
+    }
+
+    .sidebar:hover .nav-item span {
+      opacity: 1;
+    }
+
+    .nav-item:hover,
+    .nav-item.active {
+      background: rgba(46, 204, 113, 0.2);
+      color: #fff;
+    }
+
+    .nav-item.active i {
+      color: var(--green);
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      white-space: nowrap;
+    }
+
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--green), var(--green-dark));
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .user-details {
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .sidebar:hover .user-details {
+      opacity: 1;
+    }
+
+    .user-details h4 {
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .user-details p {
+      font-size: 10px;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    /* MAIN */
+    .main {
+      flex: 1;
+      margin-left: 72px;
+      min-width: 0;
+      width: calc(100% - 72px);
+    }
+
+    /* Header - Matching HR Dashboard */
+    .header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .menu-btn {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 20px;
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .header-title h1 {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      background: none;
+      -webkit-background-clip: unset;
+      background-clip: unset;
+      color: var(--text);
+    }
+
+    .header-title p {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .theme-toggle {
+      display: flex;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 30px;
+      padding: 3px;
+      gap: 2px;
+    }
+
+    .theme-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .theme-btn.active {
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      color: var(--green);
+    }
+
+    .date-badge {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      border-radius: 40px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    .avatar {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--green), var(--green-dark));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .content {
+      padding: 28px;
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+
+    /* PURCHASE ORDERS PAGE */
+    .page-header {
+      margin-bottom: 24px;
+    }
+
+    .page-header h2 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .table-container {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .table-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .add-btn {
+      background: var(--green);
+      color: white;
+      border: none;
+      padding: 10px 22px;
+      border-radius: 40px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      gap: 8px;
+      transition: 0.2s;
+      white-space: nowrap;
+    }
+
+    .add-btn:hover {
+      background: var(--green-dark);
+      transform: translateY(-1px);
+    }
+
+    .search-box {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 40px;
+      padding: 6px 18px;
+    }
+
+    .search-box input {
+      background: none;
+      border: none;
+      outline: none;
+      width: 100%;
+      min-width: 0;
+      color: var(--text);
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+      padding: 0 24px 24px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1100px;
+    }
+
+    th {
+      text-align: left;
+      padding: 14px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      background: var(--surface2);
+    }
+
+    td {
+      padding: 16px 12px;
+      font-size: 13px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 30px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .status-sales {
+      background: rgba(52, 152, 219, 0.15);
+      color: #3498db;
+    }
+
+    .status-finance {
+      background: rgba(46, 204, 113, 0.15);
+      color: #2ecc71;
+    }
+
+    .status-procurement {
+      background: rgba(241, 196, 15, 0.15);
+      color: #f1c40f;
+    }
+
+    .status-logistics {
+      background: rgba(155, 89, 182, 0.15);
+      color: #9b59b6;
+    }
+
+    .status-delivered {
+      background: rgba(46, 204, 113, 0.2);
+      color: #27ae60;
+    }
+
+    .action-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 6px 8px;
+      border-radius: 8px;
+      margin: 0 2px;
+      transition: 0.2s;
+    }
+
+    .action-btn.assign {
+      color: var(--green);
+    }
+
+    .action-btn.view {
+      color: var(--blue);
+    }
+
+    .action-btn:hover {
+      background: var(--surface2);
+      transform: scale(1.05);
+    }
+
+    /* MODALS */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(3px);
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 28px;
+      width: 90%;
+      max-width: 520px;
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+
+    .modal-content h3 {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+
+    .modal-content input,
+    .modal-content select,
+    .modal-content textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--surface2);
+      color: var(--text);
+      margin-bottom: 16px;
+      font-family: inherit;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 0;
+    }
+
+    .form-row>div {
+      flex: 1;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      margin-top: 20px;
+    }
+
+    .modal-buttons button {
+      padding: 10px 20px;
+      border-radius: 30px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+    }
+
+    .modal-buttons button.confirm {
+      background: var(--green);
+      color: white;
+    }
+
+    .modal-buttons button.cancel {
+      background: var(--surface2);
+      color: var(--text);
+    }
+
+    .fullscreen-alert {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 3000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .fullscreen-alert.active {
+      display: flex;
+    }
+
+    .alert-content {
+      background: var(--surface);
+      border-radius: 32px;
+      padding: 40px;
+      text-align: center;
+      max-width: 380px;
+    }
+
+    .alert-content i {
+      font-size: 64px;
+      color: var(--green);
+      margin-bottom: 20px;
+    }
+
+    .alert-content button {
+      background: var(--green);
+      color: #fff;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.2s ease;
+      margin-top: 10px;
+    }
+
+    .alert-content button:hover {
+      background: var(--green-dark);
+      transform: translateY(-2px);
+    }
+
+    .file-upload-label {
+      background: var(--surface2);
+      border: 1px dashed var(--green);
+      border-radius: 14px;
+      padding: 12px;
+      text-align: center;
+      cursor: pointer;
+      display: block;
+      margin-bottom: 16px;
+    }
+
+    @media (max-width: 900px) {
+      .header {
+        padding: 12px 16px;
+      }
+
+      .header-right {
+        flex-wrap: nowrap;
+        gap: 8px;
+      }
+
+      .date-badge {
+        display: none;
+      }
+
+      .theme-toggle {
+        transform: scale(0.9);
+      }
+
+      .notification-bell {
+        width: 36px;
+        height: 36px;
+        font-size: 16px;
+      }
+
+      .avatar {
+        width: 36px;
+        height: 36px;
+      }
+
+      .header-title h1 {
+        font-size: 16px;
+      }
+
+      .header-title p {
+        font-size: 10px;
+      }
+
+      .welcome-banner {
+        padding: 20px;
+        gap: 16px;
+      }
+
+      .welcome-text h2 {
+        font-size: 20px;
+      }
+
+      .welcome-text p {
+        font-size: 12px;
+      }
+
+      .welcome-stats {
+        gap: 12px;
+        width: 100%;
+        justify-content: center;
+      }
+
+      .wstat {
+        padding: 6px 16px;
+        flex: 1;
+        min-width: 80px;
+      }
+
+      .wstat-number {
+        font-size: 20px;
+      }
+
+      .wstat-label {
+        font-size: 9px;
+      }
+
+      .sidebar {
+        transform: translateX(-100%);
+        width: 260px;
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .sidebar.open .nav-item span,
+      .sidebar.open .user-details {
+        opacity: 1;
+      }
+
+      .main {
+        margin-left: 0;
+        width: 100%;
+      }
+
+      .menu-btn {
+        display: block;
+      }
+
+      .table-header {
+        flex-wrap: nowrap;
+      }
+
+      .add-btn {
+        font-size: 0.8rem;
+        padding: 8px 10px;
+      }
+
+      .search-box input {
+        font-size: 0.8rem;
+        padding: 6px;
+      }
+
+
+      .sidebar {
+        transform: translateX(-100%);
+        width: 260px;
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo"><img src="https://violet-leopard-500489.hostingersite.com/hr/public/assets/images/hr-logo2.jpg" alt="Logo" class="logo-img"></div>
+      <div class="nav-item" data-page="index"><i class="fas fa-chart-pie"></i><span>Dashboard</span></div>
+      <div class="nav-item active" data-page="purchase-orders"><i class="fas fa-cart-shopping"></i><span>Purchase Orders</span></div>
+      <div class="nav-item" data-page="finance"><i class="fas fa-dollar"></i><span>Finance</span></div>
+      <div class="nav-item" data-page="procurements"><i class="fas fa-boxes"></i><span>Procurements</span></div>
+
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="user-avatar">SM</div>
+          <div class="user-details">
+            <h4>Sales Manager</h4>
+            <p>sales@thesay.ae</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+    <div class="main">
+      <header class="header">
+        <div class="header-left">
+          <button class="menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+          <div class="header-title">
+            <h1 id="pageTitle">Sales Dashboard</h1>
+            <p>Sales Manager Command Center</p>
+          </div>
+        </div>
+        <div class="header-right">
+          <div class="date-badge"><i class="far fa-calendar-alt"></i> <span id="liveDate"></span></div>
+          <div class="theme-toggle">
+            <button class="theme-btn" id="lightBtn" onclick="setTheme('light')"><i class="fas fa-sun"></i></button>
+            <button class="theme-btn" id="darkBtn" onclick="setTheme('dark')"><i class="fas fa-moon"></i></button>
+          </div>
+          <div class="avatar">SM</div>
+        </div>
+      </header>
+      <div class="content">
+        <!-- PURCHASE ORDERS PAGE -->
+        <div id="purchaseOrdersPage">
+          <div class="page-header">
+            <h2><i class="fas fa-file-pdf"></i> Purchase Orders Management</h2>
+            <p>Create, assign vendors & track all orders</p>
+          </div>
+          <div class="table-container">
+            <div class="table-header"><button class="add-btn" onclick="openCreatePOModal()"><i class="fas fa-plus"></i> Create PO</button>
+              <div class="search-box"><i class="fas fa-search"></i><input type="text" id="searchPOInput" placeholder="Search by PO, item, vendor, customer..." onkeyup="filterPurchaseOrders()"></div>
+            </div>
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>PO Number</th>
+                    <th>Item</th>
+                    <th>Qty</th>
+                    <th>Total (AED)</th>
+                    <th>Status</th>
+                    <th>Vendor/Manufacturer</th>
+                    <th>Customer</th>
+                    <th>Payment</th>
+                    <th>PDF</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="poTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modals -->
+  <div id="createPOModal" class="modal">
+    <div class="modal-content">
+      <h3><i class="fas fa-plus-circle"></i> Create Purchase Order</h3><input type="text" id="poItem" placeholder="Item name *">
+      <div class="form-row">
+        <div><input type="number" id="poQuantity" placeholder="Quantity *"></div>
+        <div><input type="number" id="poPrice" placeholder="Unit Price (AED) *"></div>
+      </div>
+      <div class="modal-buttons"><button class="cancel" onclick="closeCreatePOModal()">Cancel</button><button class="confirm" onclick="createPurchaseOrder()">Create & Download PDF</button></div>
+    </div>
+  </div>
+
+  <div id="assignVendorModal" class="modal">
+    <div class="modal-content">
+      <h3><i class="fas fa-handshake"></i> Assign to Vendor & Upload PDF</h3><select id="vendorType">
+        <option value="">Select Manufacturer/Vendor *</option>
+        <option value="ABC Electronics">ABC Electronics</option>
+        <option value="Tech Solutions LLC">Tech Solutions LLC</option>
+        <option value="Global Traders FZE">Global Traders FZE</option>
+        <option value="John Smith (Sales)">John Smith (Sales)</option>
+        <option value="Sarah Ahmed">Sarah Ahmed</option>
+      </select><select id="customerType">
+        <option value="">Select Customer *</option>
+        <option value="Company A">Company A</option>
+        <option value="Company B">Company B</option>
+        <option value="Retail Store 1">Retail Store 1</option>
+        <option value="Wholesale Corp">Wholesale Corp</option>
+      </select><input type="date" id="assignDate"><select id="paymentOption">
+        <option value="">Payment Option *</option>
+        <option value="Advance Payment">Advance Payment</option>
+        <option value="COD">COD</option>
+        <option value="LC">Letter of Credit</option>
+        <option value="Bank Transfer">Bank Transfer</option>
+      </select>
+      <label class="file-upload-label"><i class="fas fa-upload"></i> Upload Generated PDF (Optional)<input type="file" id="pdfUpload" accept="application/pdf" style="display:none;" onchange="handlePDFUpload(event)"></label>
+      <div id="uploadStatus" style="font-size:12px; margin-bottom:12px;"></div>
+      <div class="modal-buttons"><button class="cancel" onclick="closeAssignVendorModal()">Cancel</button><button class="confirm" onclick="assignToVendor()">Assign & Forward</button></div>
+    </div>
+  </div>
+
+  <div id="fullscreenAlert" class="fullscreen-alert">
+    <div class="alert-content"><i class="fas fa-check-circle"></i>
+      <h3>Order Passed to Finance</h3>
+      <p>Purchase order assigned successfully! Vendor & details updated.</p><button onclick="closeFullscreenAlert()">Continue</button>
+    </div>
+  </div>
+
+  <script>
+    let purchaseOrders = [];
+    let poSearchTerm = '';
+    let currentAssignPO = null;
+    let uploadedPDFData = null;
+
+    const statusFlow = ['sales', 'finance', 'procurement', 'logistics', 'delivered'];
+    const statusLabels = {
+      sales: 'Sales',
+      finance: 'Finance',
+      procurement: 'Procurement',
+      logistics: 'Logistics',
+      delivered: 'Delivered'
+    };
+
+    function loadData() {
+      const stored = localStorage.getItem('sales_purchase_orders');
+      if (stored) {
+        purchaseOrders = JSON.parse(stored);
+      } else {
+        purchaseOrders = [{
+            id: 1,
+            poNumber: 'PO-2024-001',
+            item: 'Laptop Computers',
+            quantity: 10,
+            price: 2500,
+            total: 25000,
+            status: 'finance',
+            vendor: 'ABC Electronics',
+            customer: 'Company A',
+            assignDate: '2024-03-26',
+            paymentOption: 'Bank Transfer',
+            pdfBlobUrl: null,
+            createdAt: '2024-03-25'
+          },
+          {
+            id: 2,
+            poNumber: 'PO-2024-002',
+            item: 'Office Chairs',
+            quantity: 25,
+            price: 450,
+            total: 11250,
+            status: 'procurement',
+            vendor: 'Tech Solutions LLC',
+            customer: 'Company B',
+            assignDate: '2024-03-27',
+            paymentOption: 'Advance Payment',
+            pdfBlobUrl: null,
+            createdAt: '2024-03-26'
+          },
+          {
+            id: 3,
+            poNumber: 'PO-2024-003',
+            item: 'Printers',
+            quantity: 5,
+            price: 1200,
+            total: 6000,
+            status: 'sales',
+            vendor: null,
+            customer: null,
+            assignDate: null,
+            paymentOption: null,
+            pdfBlobUrl: null,
+            createdAt: '2024-03-28'
+          }
+        ];
+        saveData();
+      }
+    }
+
+    document.querySelectorAll('.nav-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const page = item.getAttribute('data-page');
+        if (page === 'finance') {
+          window.location.href = 'finance.html'
+        } else if (page === 'procurements') {
+          window.location.href = 'procurements.html'
+        }
+      });
+    });
+
+
+    function saveData() {
+      localStorage.setItem('sales_purchase_orders', JSON.stringify(purchaseOrders));
+    }
+
+    function getNextStatus(s) {
+      let idx = statusFlow.indexOf(s);
+      return idx < statusFlow.length - 1 ? statusFlow[idx + 1] : s;
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      return String(text).replace(/[&<>]/g, m => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;'
+      } [m]));
+    }
+
+    function renderPurchaseOrders() {
+      let filtered = purchaseOrders.filter(po => po.poNumber.toLowerCase().includes(poSearchTerm) || po.item.toLowerCase().includes(poSearchTerm) || (po.vendor && po.vendor.toLowerCase().includes(poSearchTerm)) || (po.customer && po.customer.toLowerCase().includes(poSearchTerm)));
+      let tbody = document.getElementById('poTableBody');
+      tbody.innerHTML = filtered.map(po => `
+        <tr>
+          <td><strong>${po.poNumber}</strong></td>
+          <td>${escapeHtml(po.item)}</td>
+          <td>${po.quantity}</td>
+          <td>AED ${po.total.toLocaleString()}</td>
+          <td><span class="status-badge status-${po.status}">${statusLabels[po.status]}</span></td>
+          <td>${po.vendor || '—'}</td>
+          <td>${po.customer || '—'}</td>
+          <td>${po.paymentOption || '—'}</td>
+          <td>${po.pdfBlobUrl ? `<a href="${po.pdfBlobUrl}" download="${po.poNumber}.pdf" style="color:var(--green);"><i class="fas fa-download"></i> PDF</a>` : '<span class="muted">—</span>'}</td>
+          <td>
+            ${po.status === 'sales' && !po.vendor ? `<button class="action-btn assign" onclick="openAssignVendorModal(${po.id})" title="Assign Vendor"><i class="fas fa-truck"></i></button>` : po.status !== 'delivered' ? `<button class="action-btn" disabled style="opacity:0.5"><i class="fas fa-clock"></i> ${getNextStatus(po.status)}</button>` : `<i class="fas fa-check-circle" style="color:var(--green);"></i> Completed`}
+           </td>
+         </tr>
+      `).join('');
+    }
+
+    function filterPurchaseOrders() {
+      poSearchTerm = document.getElementById('searchPOInput').value.toLowerCase();
+      renderPurchaseOrders();
+    }
+
+    function generatePDF(po) {
+      const {
+        jsPDF
+      } = window.jspdf;
+      const doc = new jsPDF();
+      doc.setFillColor(46, 204, 113);
+      doc.rect(0, 0, 210, 40, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(20);
+      doc.text('PURCHASE ORDER', 105, 25, {
+        align: 'center'
+      });
+      doc.setTextColor(0, 0, 0);
+      doc.setFontSize(10);
+      doc.text('Mostech Business Solutions', 14, 55);
+      doc.text('Dubai, UAE', 14, 62);
+      doc.text('Tel: +971 000000000', 14, 69);
+      doc.setFontSize(11);
+      doc.setFont(undefined, 'bold');
+      doc.text('PO Number:', 140, 55);
+      doc.text('Date:', 140, 62);
+      doc.setFont(undefined, 'normal');
+      doc.text(po.poNumber, 180, 55);
+      doc.text(new Date().toLocaleDateString(), 180, 62);
+      doc.line(14, 75, 196, 75);
+      doc.setFont(undefined, 'bold');
+      doc.text('Item Description', 20, 90);
+      doc.text('Quantity', 100, 90);
+      doc.text('Unit Price', 130, 90);
+      doc.text('Total', 160, 90);
+      doc.line(14, 95, 196, 95);
+      doc.setFont(undefined, 'normal');
+      doc.text(po.item, 20, 110);
+      doc.text(po.quantity.toString(), 105, 110);
+      doc.text(po.price.toLocaleString(), 135, 110);
+      doc.text(po.total.toLocaleString(), 165, 110);
+      doc.line(14, 120, 196, 120);
+      doc.setFont(undefined, 'bold');
+      doc.text('Total Amount:', 140, 135);
+      doc.text(`AED ${po.total.toLocaleString()}`, 180, 135);
+      doc.setFontSize(8);
+      doc.setTextColor(128, 128, 128);
+      doc.text('Generated by Sales Manager', 105, 280, {
+        align: 'center'
+      });
+      const blob = doc.output('blob');
+      const url = URL.createObjectURL(blob);
+      return url;
+    }
+
+    function createPurchaseOrder() {
+      let item = document.getElementById('poItem').value.trim(),
+        quantity = parseInt(document.getElementById('poQuantity').value),
+        price = parseFloat(document.getElementById('poPrice').value);
+      if (!item || !quantity || !price) return alert('Fill all fields');
+      let total = quantity * price,
+        poNumber = `PO-${new Date().getFullYear()}-${String(purchaseOrders.length + 1).padStart(3, '0')}`;
+      let newPO = {
+        id: Date.now(),
+        poNumber,
+        item,
+        quantity,
+        price,
+        total,
+        status: 'sales',
+        vendor: null,
+        customer: null,
+        assignDate: null,
+        paymentOption: null,
+        pdfBlobUrl: null,
+        createdAt: new Date().toISOString()
+      };
+      let pdfUrl = generatePDF(newPO);
+      newPO.pdfBlobUrl = pdfUrl;
+      purchaseOrders.unshift(newPO);
+      saveData();
+      renderPurchaseOrders();
+      closeCreatePOModal();
+      alert(`PO ${poNumber} created & PDF ready!`);
+    }
+
+    function viewPurchaseOrder(id) {
+      let po = purchaseOrders.find(p => p.id === id);
+      if (po) alert(`PO: ${po.poNumber}\nItem: ${po.item}\nQty: ${po.quantity}\nTotal: AED ${po.total.toLocaleString()}\nStatus: ${statusLabels[po.status]}\nVendor: ${po.vendor || 'Not assigned'}\nCustomer: ${po.customer || '—'}\nPayment: ${po.paymentOption || '—'}`);
+    }
+
+    function openCreatePOModal() {
+      document.getElementById('createPOModal').classList.add('active');
+    }
+
+    function closeCreatePOModal() {
+      document.getElementById('createPOModal').classList.remove('active');
+      document.getElementById('poItem').value = '';
+      document.getElementById('poQuantity').value = '';
+      document.getElementById('poPrice').value = '';
+    }
+
+    function openAssignVendorModal(poId) {
+      currentAssignPO = purchaseOrders.find(p => p.id === poId);
+      if (currentAssignPO) {
+        document.getElementById('assignVendorModal').classList.add('active');
+        uploadedPDFData = null;
+        document.getElementById('uploadStatus').innerHTML = '';
+        document.getElementById('pdfUpload').value = '';
+      }
+    }
+
+    function closeAssignVendorModal() {
+      document.getElementById('assignVendorModal').classList.remove('active');
+      currentAssignPO = null;
+      uploadedPDFData = null;
+      document.getElementById('pdfUpload').value = '';
+    }
+
+    function handlePDFUpload(event) {
+      let file = event.target.files[0];
+      if (file && file.type === 'application/pdf') {
+        let url = URL.createObjectURL(file);
+        uploadedPDFData = url;
+        document.getElementById('uploadStatus').innerHTML = '<i class="fas fa-check-circle"></i> PDF uploaded';
+      } else {
+        uploadedPDFData = null;
+        document.getElementById('uploadStatus').innerHTML = 'Invalid file';
+      }
+    }
+
+    function assignToVendor() {
+      let vendor = document.getElementById('vendorType').value,
+        customer = document.getElementById('customerType').value,
+        assignDate = document.getElementById('assignDate').value,
+        payment = document.getElementById('paymentOption').value;
+      if (!vendor || !customer || !assignDate || !payment) return alert('Fill all fields');
+      if (currentAssignPO) {
+        currentAssignPO.vendor = vendor;
+        currentAssignPO.customer = customer;
+        currentAssignPO.assignDate = assignDate;
+        currentAssignPO.paymentOption = payment;
+        if (uploadedPDFData) currentAssignPO.pdfBlobUrl = uploadedPDFData;
+        let next = getNextStatus(currentAssignPO.status);
+        currentAssignPO.status = next;
+        saveData();
+        renderPurchaseOrders();
+        closeAssignVendorModal();
+        document.getElementById('fullscreenAlert').classList.add('active');
+      }
+    }
+
+    function closeFullscreenAlert() {
+      document.getElementById('fullscreenAlert').classList.remove('active');
+    }
+
+    function setTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('sales-theme', theme);
+      document.getElementById('lightBtn').classList.toggle('active', theme === 'light');
+      document.getElementById('darkBtn').classList.toggle('active', theme === 'dark');
+    }
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('open');
+    }
+
+    // Navigation to dashboard
+    document.querySelectorAll('.nav-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const page = item.getAttribute('data-page');
+        if (page === 'index') {
+          window.location.href = 'index.html';
+        }
+      });
+    });
+
+    document.getElementById('liveDate').innerText = new Date().toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+
+    let savedTheme = localStorage.getItem('sales-theme') || 'light';
+    setTheme(savedTheme);
+    loadData();
+    renderPurchaseOrders();
+
+    // Listen for storage changes from other tab
+    window.addEventListener('storage', function(e) {
+      if (e.key === 'sales_purchase_orders') {
+        loadData();
+        renderPurchaseOrders();
+      }
+    });
+  </script>
+</body>
+
+</html>

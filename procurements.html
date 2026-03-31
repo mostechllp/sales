@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+  <title>Procurement Manager | Orders</title>
+  <meta name="theme-color" content="#2ecc71">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    :root {
+      --green: #2ecc71;
+      --green-dark: #1a9e52;
+      --green-light: #d4f7e4;
+      --red: #e74c3c;
+      --amber: #f39c12;
+      --blue: #3498db;
+      --purple: #9b59b6;
+      --orange: #e67e22;
+      --teal: #1abc9c;
+      --teal-dark: #16a085;
+      --teal-light: rgba(26,188,156,0.12);
+
+      --bg: #f4f7f5;
+      --surface: #ffffff;
+      --surface2: #f0f4f1;
+      --border: #e2ebe5;
+      --text: #1a2e22;
+      --text-secondary: #4a5f52;
+      --muted: #7a9486;
+      --sidebar-bg: #1a2e22;
+      --sidebar-text: rgba(255,255,255,0.7);
+      --shadow: 0 4px 20px rgba(0,0,0,0.05);
+      --shadow-lg: 0 12px 32px rgba(0,0,0,0.12);
+      --radius: 20px;
+      --radius-sm: 12px;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0f1412;
+      --surface: #1a241f;
+      --surface2: #1f2c26;
+      --border: #2a3a32;
+      --text: #ecfdf5;
+      --text-secondary: #b8d9cc;
+      --muted: #7e9a8c;
+      --sidebar-bg: #0a100e;
+      --sidebar-text: rgba(255,255,255,0.65);
+      --shadow: 0 4px 20px rgba(0,0,0,0.3);
+      --shadow-lg: 0 12px 32px rgba(0,0,0,0.4);
+    }
+
+    body {
+      font-family: 'Inter', 'Poppins', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      transition: background 0.3s, color 0.3s;
+      overflow-x: hidden;
+    }
+
+    .app { display: flex; min-height: 100vh; }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: 72px;
+      background: var(--sidebar-bg);
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      z-index: 200;
+      transition: width 0.3s cubic-bezier(0.4,0,0.2,1);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+    .sidebar:hover { width: 260px; }
+    .sidebar-logo {
+      padding: 20px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .logo-img {
+      width: 42px; height: 42px;
+      object-fit: contain;
+      border-radius: 12px;
+      background: white;
+      padding: 5px;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 20px;
+      margin: 4px 8px;
+      border-radius: 14px;
+      color: var(--sidebar-text);
+      font-weight: 500;
+      font-size: 14px;
+      transition: all 0.2s;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .nav-item i { width: 24px; font-size: 18px; flex-shrink: 0; }
+    .nav-item span { opacity: 0; transition: opacity 0.2s 0.05s; }
+    .sidebar:hover .nav-item span { opacity: 1; }
+    .nav-item:hover, .nav-item.active { background: rgba(46,204,113,0.2); color: #fff; }
+    .nav-item.active i { color: var(--green); }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 16px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .user-info { display: flex; align-items: center; gap: 12px; white-space: nowrap; }
+    .user-avatar {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; color: #fff; flex-shrink: 0;
+      font-size: 13px;
+    }
+    .user-details { opacity: 0; transition: opacity 0.2s; }
+    .sidebar:hover .user-details { opacity: 1; }
+    .user-details h4 { font-size: 13px; font-weight: 600; color: #fff; }
+    .user-details p { font-size: 10px; color: rgba(255,255,255,0.5); }
+
+    /* MAIN */
+    .main { flex: 1; margin-left: 72px; min-width: 0; width: calc(100% - 72px); }
+
+    .header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
+      flex-wrap: wrap; gap: 12px;
+    }
+    .header-left { display: flex; align-items: center; gap: 16px; }
+    .menu-btn { display: none; background: none; border: none; font-size: 20px; color: var(--text); cursor: pointer; }
+    .header-title h1 { font-size: 18px; font-weight: 700; color: var(--text); }
+    .header-title p { font-size: 11px; color: var(--muted); }
+    .header-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+    .theme-toggle {
+      display: flex; background: var(--surface2);
+      border: 1px solid var(--border); border-radius: 30px; padding: 3px; gap: 2px;
+    }
+    .theme-btn { width: 30px; height: 30px; border-radius: 50%; border: none; background: transparent; cursor: pointer; font-size: 13px; }
+    .theme-btn.active { background: var(--surface); box-shadow: var(--shadow); color: var(--green); }
+    .date-badge {
+      background: var(--surface2); border: 1px solid var(--border);
+      padding: 6px 14px; border-radius: 40px; font-size: 12px; font-weight: 500; color: var(--text-secondary);
+    }
+    .avatar {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+      border-radius: 10px; display: flex; align-items: center;
+      justify-content: center; font-weight: 700; color: #fff; cursor: pointer; font-size: 12px;
+    }
+
+    .content { padding: 28px; max-width: 1600px; margin: 0 auto; }
+
+    .page-header { margin-bottom: 24px; }
+    .page-header h2 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+    .page-header p { color: var(--muted); font-size: 14px; }
+
+    /* SUMMARY CARDS */
+    .summary-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px; margin-bottom: 28px;
+    }
+    .summary-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 20px;
+      display: flex; align-items: center; gap: 14px;
+    }
+    .summary-icon {
+      width: 46px; height: 46px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; flex-shrink: 0;
+    }
+    .summary-icon.teal   { background: rgba(26,188,156,0.15); color: var(--teal); }
+    .summary-icon.amber  { background: rgba(243,156,18,0.15);  color: var(--amber); }
+    .summary-icon.green  { background: rgba(46,204,113,0.15);  color: var(--green); }
+    .summary-icon.orange { background: rgba(230,126,34,0.15);  color: var(--orange); }
+    .summary-icon.blue   { background: rgba(52,152,219,0.15);  color: var(--blue); }
+
+    .summary-info h3 { font-size: 22px; font-weight: 700; color: var(--text); }
+    .summary-info p  { font-size: 11px; color: var(--muted); }
+
+    /* TABLE */
+    .table-container {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden;
+    }
+    .table-header {
+      padding: 20px 24px; border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 16px;
+    }
+    .table-header-left { display: flex; align-items: center; gap: 12px; }
+    .table-header-left h3 { font-size: 16px; font-weight: 700; }
+    .count-badge {
+      background: rgba(26,188,156,0.15); color: var(--teal);
+      font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 30px;
+    }
+    .search-box {
+      flex: 1; display: flex; align-items: center; gap: 10px;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 40px; padding: 6px 18px;
+    }
+    .search-box input {
+      background: none; border: none; outline: none;
+      width: 100%; min-width: 0; color: var(--text); font-family: inherit; font-size: 13px;
+    }
+    .table-wrapper { overflow-x: auto; padding: 0 24px 24px; }
+    table { width: 100%; border-collapse: collapse; min-width: 1100px; }
+    th {
+      text-align: left; padding: 14px 12px;
+      font-size: 12px; font-weight: 600; color: var(--muted); background: var(--surface2);
+    }
+    td { padding: 14px 12px; font-size: 13px; border-bottom: 1px solid var(--border); color: var(--text-secondary); }
+    tr:last-child td { border-bottom: none; }
+
+    /* STATUS BADGES */
+    .status-badge {
+      display: inline-block; padding: 4px 12px;
+      border-radius: 30px; font-size: 11px; font-weight: 700;
+    }
+    .s-received   { background: rgba(26,188,156,0.15);  color: #1abc9c; }
+    .s-checking   { background: rgba(243,156,18,0.15);  color: #f39c12; }
+    .s-cleared    { background: rgba(46,204,113,0.15);  color: #2ecc71; }
+    .s-dispatched { background: rgba(230,126,34,0.15);  color: #e67e22; }
+    .s-logistics  { background: rgba(155,89,182,0.15);  color: #9b59b6; }
+
+    /* PAYMENT STATUS */
+    .pay-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 10px; border-radius: 30px; font-size: 11px; font-weight: 700;
+    }
+    .pay-verified   { background: rgba(46,204,113,0.15); color: #2ecc71; }
+    .pay-pending    { background: rgba(243,156,18,0.15); color: #f39c12; }
+    .pay-failed     { background: rgba(231,76,60,0.15);  color: #e74c3c; }
+
+    /* ACTION BUTTONS */
+    .action-btn {
+      background: none; border: none; cursor: pointer;
+      padding: 7px 10px; border-radius: 10px; margin: 0 2px;
+      transition: 0.2s; font-size: 13px; font-weight: 600;
+      display: inline-flex; align-items: center; gap: 5px;
+      font-family: inherit;
+    }
+    .action-btn.view-btn    { color: var(--teal); }
+    .action-btn.process-btn { color: var(--amber); }
+    .action-btn.dispatch-btn{ color: var(--orange); }
+    .action-btn:hover { background: var(--surface2); transform: scale(1.04); }
+    .action-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+    .done-label { font-size: 12px; color: var(--purple); font-weight: 600; }
+
+    /* MODALS */
+    .modal {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.6); z-index: 2000;
+      align-items: center; justify-content: center;
+      backdrop-filter: blur(3px);
+    }
+    .modal.active { display: flex; }
+    .modal-content {
+      background: var(--surface); border-radius: var(--radius);
+      padding: 28px; width: 90%; max-width: 580px;
+      max-height: 90vh; overflow-y: auto;
+    }
+    .modal-content h3 {
+      font-size: 20px; font-weight: 700; margin-bottom: 20px;
+      display: flex; align-items: center; gap: 10px;
+    }
+
+    /* DETAIL GRID */
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+    .detail-item {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 14px;
+    }
+    .detail-item label {
+      font-size: 10px; font-weight: 600; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 4px;
+    }
+    .detail-item span { font-size: 14px; font-weight: 600; color: var(--text); }
+    .detail-item.full { grid-column: 1 / -1; }
+    .detail-item.highlight span { color: var(--teal); font-size: 18px; }
+
+    /* INVOICE CARD inside modal */
+    .invoice-card {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 20px; margin-bottom: 16px;
+    }
+    .invoice-card-header {
+      background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+      color: white; border-radius: 12px; padding: 16px 18px;
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 16px;
+    }
+    .invoice-card-header h4 { font-size: 16px; font-weight: 700; }
+    .invoice-card-header p  { font-size: 11px; opacity: 0.85; }
+    .inv-num-pill {
+      background: rgba(255,255,255,0.2); padding: 6px 14px;
+      border-radius: 30px; font-weight: 700; font-size: 13px;
+    }
+    .inv-line { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; }
+    .inv-line span:first-child { color: var(--muted); }
+    .inv-line span:last-child  { font-weight: 600; color: var(--text); }
+    .inv-total {
+      display: flex; justify-content: space-between;
+      background: var(--green-light); border-radius: 10px; padding: 10px 14px;
+      margin-top: 12px;
+    }
+    .inv-total span:first-child { font-weight: 700; color: var(--green-dark); font-size: 13px; }
+    .inv-total span:last-child  { font-weight: 800; color: var(--green-dark); font-size: 16px; }
+
+    /* PROCESS FORM */
+    .form-section-title {
+      font-size: 12px; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.6px;
+      margin-bottom: 12px; margin-top: 4px;
+    }
+    .form-group { margin-bottom: 14px; }
+    .form-group label { font-size: 12px; font-weight: 600; color: var(--text-secondary); display: block; margin-bottom: 6px; }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%; padding: 11px 14px;
+      border: 1px solid var(--border); border-radius: var(--radius-sm);
+      background: var(--surface2); color: var(--text);
+      font-family: inherit; font-size: 13px; outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-group input:focus,
+    .form-group select:focus { border-color: var(--teal); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    /* CHECKLIST */
+    .checklist { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+    .check-item {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 12px 14px; cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .check-item:hover { border-color: var(--teal); }
+    .check-item.checked { border-color: var(--green); background: rgba(46,204,113,0.06); }
+    .check-item input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--teal); flex-shrink: 0; cursor: pointer; }
+    .check-item .check-label { font-size: 13px; font-weight: 500; color: var(--text); }
+    .check-item .check-sub   { font-size: 11px; color: var(--muted); }
+
+    /* PAYMENT VERIFICATION RESULT */
+    .verify-result {
+      border-radius: var(--radius-sm); padding: 14px;
+      margin-bottom: 14px; display: none;
+      align-items: center; gap: 12px;
+    }
+    .verify-result.ok  { background: rgba(46,204,113,0.12); border: 1px solid rgba(46,204,113,0.3); }
+    .verify-result.nok { background: rgba(231,76,60,0.10);  border: 1px solid rgba(231,76,60,0.3); }
+    .verify-result i   { font-size: 22px; }
+    .verify-result.ok  i { color: var(--green); }
+    .verify-result.nok i { color: var(--red); }
+    .verify-result div p:first-child { font-size: 13px; font-weight: 700; color: var(--text); }
+    .verify-result div p:last-child  { font-size: 11px; color: var(--muted); }
+
+    /* MODAL BUTTONS */
+    .modal-buttons {
+      display: flex; gap: 12px; justify-content: flex-end; margin-top: 20px; flex-wrap: wrap;
+    }
+    .modal-buttons button {
+      padding: 10px 20px; border-radius: 30px; font-weight: 600;
+      cursor: pointer; border: none; font-family: inherit;
+      display: flex; align-items: center; gap: 8px; font-size: 13px;
+    }
+    .btn-teal    { background: var(--teal); color: white; }
+    .btn-orange  { background: var(--orange); color: white; }
+    .btn-cancel  { background: var(--surface2); color: var(--text); }
+    .btn-green   { background: var(--green); color: white; }
+    .btn-amber   { background: var(--amber); color: white; }
+
+    /* DIVIDER */
+    .modal-divider { height: 1px; background: var(--border); margin: 18px 0; }
+
+    /* FULLSCREEN ALERT */
+    .fullscreen-alert {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.8); z-index: 3000;
+      align-items: center; justify-content: center;
+    }
+    .fullscreen-alert.active { display: flex; }
+    .alert-content {
+      background: var(--surface); border-radius: 32px;
+      padding: 44px; text-align: center; max-width: 420px; width: 90%;
+    }
+    .alert-icon-wrap {
+      width: 90px; height: 90px; border-radius: 50%;
+      background: rgba(230,126,34,0.12);
+      display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;
+    }
+    .alert-icon-wrap i { font-size: 42px; color: var(--orange); }
+    .alert-content h3 { font-size: 22px; font-weight: 700; margin-bottom: 10px; }
+    .alert-content p { font-size: 14px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 8px; }
+    .alert-po-pill {
+      display: inline-block; background: rgba(230,126,34,0.1);
+      color: var(--orange); font-weight: 700; font-size: 15px;
+      padding: 6px 18px; border-radius: 30px; margin-bottom: 16px;
+    }
+    .alert-delivery-info {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 14px;
+      margin-bottom: 20px; text-align: left;
+    }
+    .alert-delivery-info .adi-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 13px; }
+    .alert-delivery-info .adi-row:last-child { margin-bottom: 0; }
+    .alert-delivery-info .adi-label { color: var(--muted); }
+    .alert-delivery-info .adi-value { font-weight: 700; color: var(--text); }
+    .alert-content button {
+      background: var(--orange); color: #fff;
+      padding: 12px 28px; border: none; border-radius: 30px;
+      font-size: 14px; font-weight: 600; cursor: pointer;
+      transition: background 0.3s, transform 0.2s; font-family: inherit;
+    }
+    .alert-content button:hover { background: #d35400; transform: translateY(-2px); }
+
+    /* MOBILE */
+    @media (max-width: 900px) {
+      .header { padding: 12px 16px; }
+      .header-right { flex-wrap: nowrap; gap: 8px; }
+      .date-badge { display: none; }
+      .theme-toggle { transform: scale(0.9); }
+      .sidebar { transform: translateX(-100%); width: 260px; }
+      .sidebar.open { transform: translateX(0); }
+      .sidebar.open .nav-item span,
+      .sidebar.open .user-details { opacity: 1; }
+      .main { margin-left: 0; width: 100%; }
+      .menu-btn { display: block; }
+      .summary-cards { grid-template-columns: 1fr 1fr; }
+      .detail-grid { grid-template-columns: 1fr; }
+      .detail-item.full { grid-column: 1; }
+      .form-row { grid-template-columns: 1fr; }
+      .modal-content { padding: 20px; }
+    }
+  </style>
+</head>
+
+<body>
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <img src="https://violet-leopard-500489.hostingersite.com/hr/public/assets/images/hr-logo2.jpg" alt="Logo" class="logo-img">
+    </div>
+    <div class="nav-item" data-page="index">           <i class="fas fa-chart-pie"></i>          <span>Dashboard</span></div>
+    <div class="nav-item" data-page="purchase-orders"> <i class="fas fa-cart-shopping"></i>       <span>Purchase Orders</span></div>
+    <div class="nav-item" data-page="finance">         <i class="fas fa-file-invoice-dollar"></i> <span>Finance</span></div>
+    <div class="nav-item active" data-page="procurement"><i class="fas fa-boxes-stacked"></i>     <span>Procurement</span></div>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar">PM</div>
+        <div class="user-details">
+          <h4>Procurement Manager</h4>
+          <p>procurement@thesay.ae</p>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <!-- HEADER -->
+    <header class="header">
+      <div class="header-left">
+        <button class="menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+        <div class="header-title">
+          <h1>Procurement Dashboard</h1>
+          <p>Procurement Manager Command Center</p>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="date-badge"><i class="far fa-calendar-alt"></i> <span id="liveDate"></span></div>
+        <div class="theme-toggle">
+          <button class="theme-btn" id="lightBtn" onclick="setTheme('light')"><i class="fas fa-sun"></i></button>
+          <button class="theme-btn" id="darkBtn"  onclick="setTheme('dark')"> <i class="fas fa-moon"></i></button>
+        </div>
+        <div class="avatar">PM</div>
+      </div>
+    </header>
+
+    <div class="content">
+      <div class="page-header">
+        <h2><i class="fas fa-boxes-stacked"></i> Procurement — Orders from Finance</h2>
+        <p>Verify invoices, check payments, set delivery dates & dispatch to Logistics</p>
+      </div>
+
+      <!-- SUMMARY CARDS -->
+      <div class="summary-cards">
+        <div class="summary-card">
+          <div class="summary-icon teal"><i class="fas fa-inbox"></i></div>
+          <div class="summary-info"><h3 id="cTotal">0</h3><p>Total Received</p></div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-icon amber"><i class="fas fa-hourglass-half"></i></div>
+          <div class="summary-info"><h3 id="cPending">0</h3><p>Awaiting Processing</p></div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-icon green"><i class="fas fa-circle-check"></i></div>
+          <div class="summary-info"><h3 id="cCleared">0</h3><p>Payment Cleared</p></div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-icon orange"><i class="fas fa-truck-fast"></i></div>
+          <div class="summary-info"><h3 id="cDispatched">0</h3><p>Sent to Logistics</p></div>
+        </div>
+      </div>
+
+      <!-- TABLE -->
+      <div class="table-container">
+        <div class="table-header">
+          <div class="table-header-left">
+            <h3>Procurement Orders</h3>
+            <span class="count-badge" id="tableCountBadge">0 orders</span>
+          </div>
+          <div class="search-box">
+            <i class="fas fa-search" style="color:var(--muted);"></i>
+            <input type="text" id="searchInput" placeholder="Search by PO, item, vendor, customer..." onkeyup="filterOrders()">
+          </div>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>PO Number</th>
+                <th>Invoice #</th>
+                <th>Item</th>
+                <th>Qty</th>
+                <th>Total (AED)</th>
+                <th>Vendor</th>
+                <th>Customer</th>
+                <th>Payment</th>
+                <th>Pay Status</th>
+                <th>Delivery Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="procTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ VIEW DETAILS MODAL ============ -->
+<div id="viewModal" class="modal">
+  <div class="modal-content" style="max-width:600px;">
+    <h3><i class="fas fa-eye" style="color:var(--teal);"></i> Order & Invoice Details</h3>
+
+    <!-- Invoice card -->
+    <div id="invoiceCardView"></div>
+
+    <!-- Full details -->
+    <div class="detail-grid" id="detailGrid"></div>
+
+    <div class="modal-buttons">
+      <button class="btn-cancel" onclick="closeModal('viewModal')"><i class="fas fa-times"></i> Close</button>
+      <button class="btn-teal"   onclick="openProcessFromView()"><i class="fas fa-cog"></i> Process Order</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PROCESS ORDER MODAL ============ -->
+<div id="processModal" class="modal">
+  <div class="modal-content" style="max-width:620px;">
+    <h3><i class="fas fa-cog" style="color:var(--amber);"></i> Process Procurement Order</h3>
+
+    <!-- Mini invoice card -->
+    <div id="processInvoiceCard"></div>
+
+    <div class="modal-divider"></div>
+
+    <!-- Payment Verification -->
+    <p class="form-section-title"><i class="fas fa-credit-card"></i> &nbsp;Payment Verification</p>
+    <div class="checklist" id="payChecklist">
+      <label class="check-item" id="ci1">
+        <input type="checkbox" onchange="onCheck(this,'ci1')">
+        <div>
+          <div class="check-label">Invoice Amount Matches PO Total</div>
+          <div class="check-sub">Confirm invoice value equals purchase order total</div>
+        </div>
+      </label>
+      <label class="check-item" id="ci2">
+        <input type="checkbox" onchange="onCheck(this,'ci2')">
+        <div>
+          <div class="check-label">Payment Mode Confirmed</div>
+          <div class="check-sub">Verify agreed payment method is in place</div>
+        </div>
+      </label>
+      <label class="check-item" id="ci3">
+        <input type="checkbox" onchange="onCheck(this,'ci3')">
+        <div>
+          <div class="check-label">Vendor Bank Details Verified</div>
+          <div class="check-sub">Confirm vendor account number and bank name</div>
+        </div>
+      </label>
+      <label class="check-item" id="ci4">
+        <input type="checkbox" onchange="onCheck(this,'ci4')">
+        <div>
+          <div class="check-label">Finance Approval Received</div>
+          <div class="check-sub">Finance team has signed off on this invoice</div>
+        </div>
+      </label>
+    </div>
+
+    <div class="verify-result" id="verifyResult">
+      <i class="fas fa-circle-check"></i>
+      <div>
+        <p>Payment Verified</p>
+        <p id="verifySubText">All checks passed. Ready to proceed.</p>
+      </div>
+    </div>
+
+    <div class="modal-divider"></div>
+
+    <!-- Delivery & Dispatch Form -->
+    <p class="form-section-title"><i class="fas fa-truck"></i> &nbsp;Delivery & Dispatch Details</p>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Expected Delivery Date *</label>
+        <input type="date" id="deliveryDate">
+      </div>
+      <div class="form-group">
+        <label>Dispatch Mode *</label>
+        <select id="dispatchMode">
+          <option value="">Select mode...</option>
+          <option value="Road Freight">Road Freight</option>
+          <option value="Air Freight">Air Freight</option>
+          <option value="Sea Freight">Sea Freight</option>
+          <option value="Courier">Courier</option>
+          <option value="Own Fleet">Own Fleet</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Logistics Partner / Carrier</label>
+        <input type="text" id="carrier" placeholder="e.g. Aramex, DHL, FedEx">
+      </div>
+      <div class="form-group">
+        <label>Tracking / Reference #</label>
+        <input type="text" id="trackingRef" placeholder="e.g. ARX-123456">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Delivery Address *</label>
+      <input type="text" id="deliveryAddress" placeholder="Full delivery address">
+    </div>
+    <div class="form-group">
+      <label>Special Instructions for Logistics</label>
+      <textarea id="specialNotes" rows="3" placeholder="Fragile items, temperature control, access restrictions..."></textarea>
+    </div>
+
+    <div class="modal-buttons">
+      <button class="btn-cancel"  onclick="closeModal('processModal')"><i class="fas fa-times"></i> Cancel</button>
+      <button class="btn-amber"   onclick="verifyPayment()"><i class="fas fa-shield-halved"></i> Verify Payment</button>
+      <button class="btn-orange"  onclick="dispatchToLogistics()"><i class="fas fa-truck-fast"></i> Dispatch to Logistics</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ FULLSCREEN ALERT ============ -->
+<div id="fullscreenAlert" class="fullscreen-alert">
+  <div class="alert-content">
+    <div class="alert-icon-wrap"><i class="fas fa-truck-fast"></i></div>
+    <h3>Dispatched to Logistics!</h3>
+    <div class="alert-po-pill" id="alertPONum">PO-2024-001</div>
+    <p>Order has been cleared by Procurement and all delivery details have been passed to the Logistics team for final delivery.</p>
+    <div class="alert-delivery-info" id="alertDeliveryInfo"></div>
+    <button onclick="closeFullscreenAlert()"><i class="fas fa-check"></i> Continue</button>
+  </div>
+</div>
+
+<script>
+  /* =====================================================
+     DATA LAYER
+  ===================================================== */
+  let allOrders = [];
+  let filteredOrders = [];
+  let currentPO = null;
+  let searchTerm = '';
+
+  const PROC_STATUS = {
+    RECEIVED:   'received',
+    CHECKING:   'checking',
+    CLEARED:    'cleared',
+    DISPATCHED: 'dispatched'
+  };
+
+  function loadOrders() {
+    // Read sales orders that have reached 'procurement' stage or beyond
+    const raw = localStorage.getItem('sales_purchase_orders');
+    let salesOrders = raw ? JSON.parse(raw) : [];
+    const validStatuses = ['procurement', 'logistics', 'delivered'];
+    let base = salesOrders.filter(o => validStatuses.includes(o.status));
+
+    // Finance data (invoice numbers)
+    const financeData = JSON.parse(localStorage.getItem('finance_orders') || '{}');
+
+    // Procurement-specific data
+    const procData = JSON.parse(localStorage.getItem('procurement_orders') || '{}');
+
+    allOrders = base.map(o => {
+      const fd = financeData[o.id] || {};
+      const pd = procData[o.id] || {};
+      return {
+        ...o,
+        invoiceNumber:    fd.invoiceNumber  || null,
+        financeDate:      fd.financeDate    || null,
+        procStatus:       pd.procStatus     || PROC_STATUS.RECEIVED,
+        paymentVerified:  pd.paymentVerified|| false,
+        deliveryDate:     pd.deliveryDate   || null,
+        dispatchMode:     pd.dispatchMode   || null,
+        carrier:          pd.carrier        || null,
+        trackingRef:      pd.trackingRef    || null,
+        deliveryAddress:  pd.deliveryAddress|| null,
+        specialNotes:     pd.specialNotes   || null,
+        dispatchedAt:     pd.dispatchedAt   || null,
+        checks:           pd.checks         || {}
+      };
+    });
+
+    // If no real data, use demo
+    if (allOrders.length === 0) allOrders = getDemoOrders();
+
+    filteredOrders = [...allOrders];
+    updateCards();
+    renderTable();
+  }
+
+  function getDemoOrders() {
+    return [
+      {
+        id: 201, poNumber: 'PO-2024-001', item: 'Laptop Computers',
+        quantity: 10, price: 2500, total: 25000, status: 'procurement',
+        vendor: 'ABC Electronics', customer: 'Company A',
+        assignDate: '2024-03-26', paymentOption: 'Bank Transfer',
+        invoiceNumber: 'INV-2024-001', financeDate: '2024-03-28',
+        procStatus: PROC_STATUS.RECEIVED, paymentVerified: false,
+        deliveryDate: null, dispatchMode: null, carrier: null,
+        trackingRef: null, deliveryAddress: null, specialNotes: null,
+        dispatchedAt: null, checks: {}
+      },
+      {
+        id: 202, poNumber: 'PO-2024-002', item: 'Office Chairs',
+        quantity: 25, price: 450, total: 11250, status: 'procurement',
+        vendor: 'Tech Solutions LLC', customer: 'Company B',
+        assignDate: '2024-03-27', paymentOption: 'Advance Payment',
+        invoiceNumber: 'INV-2024-002', financeDate: '2024-03-29',
+        procStatus: PROC_STATUS.CLEARED, paymentVerified: true,
+        deliveryDate: '2024-04-10', dispatchMode: 'Road Freight',
+        carrier: 'Aramex', trackingRef: 'ARX-556677',
+        deliveryAddress: 'Business Bay, Dubai, UAE', specialNotes: '',
+        dispatchedAt: null, checks: { ci1:true, ci2:true, ci3:true, ci4:true }
+      },
+      {
+        id: 203, poNumber: 'PO-2024-005', item: 'Server Racks',
+        quantity: 3, price: 8500, total: 25500, status: 'logistics',
+        vendor: 'Global Traders FZE', customer: 'Wholesale Corp',
+        assignDate: '2024-03-29', paymentOption: 'LC',
+        invoiceNumber: 'INV-2024-003', financeDate: '2024-03-30',
+        procStatus: PROC_STATUS.DISPATCHED, paymentVerified: true,
+        deliveryDate: '2024-04-15', dispatchMode: 'Air Freight',
+        carrier: 'DHL', trackingRef: 'DHL-998812',
+        deliveryAddress: 'JAFZA, Dubai, UAE', specialNotes: 'Handle with care',
+        dispatchedAt: '2024-04-01', checks: { ci1:true, ci2:true, ci3:true, ci4:true }
+      }
+    ];
+  }
+
+  function saveProcData() {
+    const procData = {};
+    allOrders.forEach(o => {
+      procData[o.id] = {
+        procStatus:      o.procStatus,
+        paymentVerified: o.paymentVerified,
+        deliveryDate:    o.deliveryDate,
+        dispatchMode:    o.dispatchMode,
+        carrier:         o.carrier,
+        trackingRef:     o.trackingRef,
+        deliveryAddress: o.deliveryAddress,
+        specialNotes:    o.specialNotes,
+        dispatchedAt:    o.dispatchedAt,
+        checks:          o.checks
+      };
+    });
+    localStorage.setItem('procurement_orders', JSON.stringify(procData));
+  }
+
+  function updateCards() {
+    document.getElementById('cTotal').textContent     = allOrders.length;
+    document.getElementById('cPending').textContent   = allOrders.filter(o => o.procStatus === PROC_STATUS.RECEIVED || o.procStatus === PROC_STATUS.CHECKING).length;
+    document.getElementById('cCleared').textContent   = allOrders.filter(o => o.procStatus === PROC_STATUS.CLEARED).length;
+    document.getElementById('cDispatched').textContent= allOrders.filter(o => o.procStatus === PROC_STATUS.DISPATCHED).length;
+  }
+
+  /* =====================================================
+     FILTER & RENDER TABLE
+  ===================================================== */
+  function filterOrders() {
+    searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    filteredOrders = allOrders.filter(o =>
+      o.poNumber.toLowerCase().includes(searchTerm) ||
+      o.item.toLowerCase().includes(searchTerm) ||
+      (o.vendor    && o.vendor.toLowerCase().includes(searchTerm)) ||
+      (o.customer  && o.customer.toLowerCase().includes(searchTerm)) ||
+      (o.invoiceNumber && o.invoiceNumber.toLowerCase().includes(searchTerm))
+    );
+    renderTable();
+  }
+
+  function esc(t) {
+    if (!t) return '';
+    return String(t).replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]));
+  }
+
+  function procStatusBadge(s) {
+    const map = {
+      received:   ['s-received',   'Received'],
+      checking:   ['s-checking',   'Checking'],
+      cleared:    ['s-cleared',    'Cleared'],
+      dispatched: ['s-dispatched', 'Dispatched']
+    };
+    const [cls, lbl] = map[s] || ['s-received', s];
+    return `<span class="status-badge ${cls}">${lbl}</span>`;
+  }
+
+  function payBadge(verified) {
+    return verified
+      ? `<span class="pay-badge pay-verified"><i class="fas fa-circle-check"></i> Verified</span>`
+      : `<span class="pay-badge pay-pending"><i class="fas fa-clock"></i> Pending</span>`;
+  }
+
+  function renderTable() {
+    const tbody = document.getElementById('procTableBody');
+    document.getElementById('tableCountBadge').textContent = `${filteredOrders.length} order${filteredOrders.length !== 1 ? 's' : ''}`;
+
+    if (filteredOrders.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="12" style="text-align:center;padding:40px;color:var(--muted);">
+        <i class="fas fa-boxes-stacked" style="font-size:32px;display:block;margin-bottom:12px;opacity:0.4;"></i>
+        No procurement orders found
+      </td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = filteredOrders.map(o => `
+      <tr>
+        <td><strong>${esc(o.poNumber)}</strong></td>
+        <td style="color:var(--teal);font-weight:600;">${esc(o.invoiceNumber) || '—'}</td>
+        <td>${esc(o.item)}</td>
+        <td>${o.quantity}</td>
+        <td><strong>AED ${Number(o.total).toLocaleString()}</strong></td>
+        <td>${esc(o.vendor) || '—'}</td>
+        <td>${esc(o.customer) || '—'}</td>
+        <td>${esc(o.paymentOption) || '—'}</td>
+        <td>${payBadge(o.paymentVerified)}</td>
+        <td>${o.deliveryDate
+            ? `<span style="color:var(--green);font-weight:600;"><i class="fas fa-calendar-check"></i> ${o.deliveryDate}</span>`
+            : '<span style="color:var(--muted);">—</span>'}</td>
+        <td>${procStatusBadge(o.procStatus)}</td>
+        <td>
+          <button class="action-btn view-btn" onclick="openViewModal(${o.id})" title="View Details">
+            <i class="fas fa-eye"></i> View
+          </button>
+          ${o.procStatus === PROC_STATUS.DISPATCHED
+            ? `<span class="done-label"><i class="fas fa-check-circle"></i> To Logistics</span>`
+            : `<button class="action-btn process-btn" onclick="openProcessModal(${o.id})" title="Process Order">
+                <i class="fas fa-cog"></i> Process
+              </button>`
+          }
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  /* =====================================================
+     VIEW MODAL
+  ===================================================== */
+  function openViewModal(id) {
+    currentPO = allOrders.find(o => o.id === id);
+    if (!currentPO) return;
+
+    document.getElementById('invoiceCardView').innerHTML = buildInvoiceCard(currentPO);
+    document.getElementById('detailGrid').innerHTML = buildDetailGrid(currentPO);
+    openModal('viewModal');
+  }
+
+  function buildInvoiceCard(po) {
+    return `
+      <div class="invoice-card">
+        <div class="invoice-card-header">
+          <div>
+            <h4>Invoice Summary</h4>
+            <p>Mostech Business Solutions &bull; Dubai, UAE</p>
+          </div>
+          <div class="inv-num-pill">${esc(po.invoiceNumber) || 'N/A'}</div>
+        </div>
+        <div class="inv-line"><span>PO Reference</span><span>${esc(po.poNumber)}</span></div>
+        <div class="inv-line"><span>Item</span><span>${esc(po.item)}</span></div>
+        <div class="inv-line"><span>Quantity</span><span>${po.quantity} units</span></div>
+        <div class="inv-line"><span>Unit Price</span><span>AED ${Number(po.price).toLocaleString()}</span></div>
+        <div class="inv-line"><span>Vendor</span><span>${esc(po.vendor) || '—'}</span></div>
+        <div class="inv-line"><span>Payment Terms</span><span>${esc(po.paymentOption) || '—'}</span></div>
+        <div class="inv-line"><span>Invoice Date</span><span>${po.financeDate || '—'}</span></div>
+        <div class="inv-total">
+          <span>Total Due</span>
+          <span>AED ${Number(po.total).toLocaleString()}</span>
+        </div>
+      </div>
+    `;
+  }
+
+  function buildDetailGrid(po) {
+    return `
+      <div class="detail-item"><label>PO Number</label><span>${esc(po.poNumber)}</span></div>
+      <div class="detail-item"><label>Procurement Status</label><span>${po.procStatus.charAt(0).toUpperCase()+po.procStatus.slice(1)}</span></div>
+      <div class="detail-item"><label>Customer</label><span>${esc(po.customer) || '—'}</span></div>
+      <div class="detail-item"><label>Payment</label><span>${esc(po.paymentOption) || '—'}</span></div>
+      <div class="detail-item"><label>Payment Verified</label><span style="color:${po.paymentVerified ? 'var(--green)' : 'var(--amber)'};">${po.paymentVerified ? '✓ Yes' : '⏳ No'}</span></div>
+      <div class="detail-item"><label>Delivery Date</label><span>${po.deliveryDate || '—'}</span></div>
+      <div class="detail-item"><label>Dispatch Mode</label><span>${po.dispatchMode || '—'}</span></div>
+      <div class="detail-item"><label>Carrier</label><span>${po.carrier || '—'}</span></div>
+      <div class="detail-item"><label>Tracking Ref</label><span>${po.trackingRef || '—'}</span></div>
+      <div class="detail-item full"><label>Delivery Address</label><span>${po.deliveryAddress || '—'}</span></div>
+      ${po.specialNotes ? `<div class="detail-item full"><label>Special Instructions</label><span>${esc(po.specialNotes)}</span></div>` : ''}
+      ${po.dispatchedAt ? `<div class="detail-item full"><label>Dispatched At</label><span style="color:var(--orange);">${po.dispatchedAt}</span></div>` : ''}
+    `;
+  }
+
+  function openProcessFromView() {
+    closeModal('viewModal');
+    if (currentPO) openProcessModal(currentPO.id);
+  }
+
+  /* =====================================================
+     PROCESS MODAL
+  ===================================================== */
+  function openProcessModal(id) {
+    currentPO = allOrders.find(o => o.id === id);
+    if (!currentPO) return;
+
+    document.getElementById('processInvoiceCard').innerHTML = buildInvoiceCard(currentPO);
+
+    // Restore checkboxes state
+    ['ci1','ci2','ci3','ci4'].forEach(cid => {
+      const cb = document.querySelector(`#${cid} input[type="checkbox"]`);
+      const checked = !!(currentPO.checks && currentPO.checks[cid]);
+      if (cb) { cb.checked = checked; }
+      const el = document.getElementById(cid);
+      if (el) el.classList.toggle('checked', checked);
+    });
+
+    // Restore form
+    document.getElementById('deliveryDate').value    = currentPO.deliveryDate    || '';
+    document.getElementById('dispatchMode').value    = currentPO.dispatchMode    || '';
+    document.getElementById('carrier').value         = currentPO.carrier         || '';
+    document.getElementById('trackingRef').value     = currentPO.trackingRef     || '';
+    document.getElementById('deliveryAddress').value = currentPO.deliveryAddress || '';
+    document.getElementById('specialNotes').value    = currentPO.specialNotes    || '';
+
+    // Restore verify result
+    const vr = document.getElementById('verifyResult');
+    vr.style.display = 'none';
+    if (currentPO.paymentVerified) {
+      vr.className = 'verify-result ok';
+      vr.style.display = 'flex';
+      document.getElementById('verifySubText').textContent = 'All checks passed. Payment is verified.';
+      vr.querySelector('i').className = 'fas fa-circle-check';
+    }
+
+    // Mark status as checking if just received
+    if (currentPO.procStatus === PROC_STATUS.RECEIVED) {
+      currentPO.procStatus = PROC_STATUS.CHECKING;
+      saveProcData();
+      renderTable();
+    }
+
+    openModal('processModal');
+  }
+
+  function onCheck(cb, cid) {
+    const el = document.getElementById(cid);
+    el.classList.toggle('checked', cb.checked);
+    if (currentPO) {
+      if (!currentPO.checks) currentPO.checks = {};
+      currentPO.checks[cid] = cb.checked;
+    }
+  }
+
+  function verifyPayment() {
+    const allChecked = ['ci1','ci2','ci3','ci4'].every(cid => {
+      const cb = document.querySelector(`#${cid} input[type="checkbox"]`);
+      return cb && cb.checked;
+    });
+
+    const vr = document.getElementById('verifyResult');
+    vr.style.display = 'flex';
+
+    if (allChecked) {
+      vr.className = 'verify-result ok';
+      vr.querySelector('i').className = 'fas fa-circle-check';
+      document.getElementById('verifySubText').textContent = 'All checks passed. Payment is verified. Ready to dispatch.';
+      if (currentPO) {
+        currentPO.paymentVerified = true;
+        currentPO.procStatus = PROC_STATUS.CLEARED;
+        saveProcData();
+        updateCards();
+        renderTable();
+      }
+    } else {
+      vr.className = 'verify-result nok';
+      vr.querySelector('i').className = 'fas fa-circle-xmark';
+      document.getElementById('verifySubText').textContent = 'Please complete all payment checks before verifying.';
+      if (currentPO) {
+        currentPO.paymentVerified = false;
+        saveProcData();
+        updateCards();
+        renderTable();
+      }
+    }
+  }
+
+  function dispatchToLogistics() {
+    if (!currentPO) return;
+
+    const deliveryDate    = document.getElementById('deliveryDate').value;
+    const dispatchMode    = document.getElementById('dispatchMode').value;
+    const carrier         = document.getElementById('carrier').value.trim();
+    const trackingRef     = document.getElementById('trackingRef').value.trim();
+    const deliveryAddress = document.getElementById('deliveryAddress').value.trim();
+    const specialNotes    = document.getElementById('specialNotes').value.trim();
+
+    if (!deliveryDate)    return alert('Please set an expected delivery date.');
+    if (!dispatchMode)    return alert('Please select a dispatch mode.');
+    if (!deliveryAddress) return alert('Please enter a delivery address.');
+
+    if (!currentPO.paymentVerified) {
+      const go = confirm('Payment has not been fully verified. Dispatch anyway?');
+      if (!go) return;
+    }
+
+    // Save dispatch data
+    currentPO.deliveryDate    = deliveryDate;
+    currentPO.dispatchMode    = dispatchMode;
+    currentPO.carrier         = carrier;
+    currentPO.trackingRef     = trackingRef;
+    currentPO.deliveryAddress = deliveryAddress;
+    currentPO.specialNotes    = specialNotes;
+    currentPO.procStatus      = PROC_STATUS.DISPATCHED;
+    currentPO.dispatchedAt    = new Date().toLocaleString('en-US');
+
+    // Push to logistics_orders in localStorage
+    const logData = JSON.parse(localStorage.getItem('logistics_orders') || '{}');
+    logData[currentPO.id] = {
+      poNumber:        currentPO.poNumber,
+      invoiceNumber:   currentPO.invoiceNumber,
+      item:            currentPO.item,
+      quantity:        currentPO.quantity,
+      total:           currentPO.total,
+      vendor:          currentPO.vendor,
+      customer:        currentPO.customer,
+      paymentOption:   currentPO.paymentOption,
+      paymentVerified: currentPO.paymentVerified,
+      deliveryDate:    deliveryDate,
+      dispatchMode:    dispatchMode,
+      carrier:         carrier,
+      trackingRef:     trackingRef,
+      deliveryAddress: deliveryAddress,
+      specialNotes:    specialNotes,
+      dispatchedAt:    currentPO.dispatchedAt,
+      logStatus:       'pending',   // logistics will update this
+    };
+    localStorage.setItem('logistics_orders', JSON.stringify(logData));
+
+    // Update sales orders status to 'logistics'
+    const raw = localStorage.getItem('sales_purchase_orders');
+    if (raw) {
+      let salesOrders = JSON.parse(raw);
+      const idx = salesOrders.findIndex(o => o.id === currentPO.id);
+      if (idx !== -1) {
+        salesOrders[idx].status = 'logistics';
+        localStorage.setItem('sales_purchase_orders', JSON.stringify(salesOrders));
+      }
+    }
+
+    saveProcData();
+    updateCards();
+    renderTable();
+    closeModal('processModal');
+
+    // Show fullscreen alert
+    document.getElementById('alertPONum').textContent = currentPO.poNumber;
+    document.getElementById('alertDeliveryInfo').innerHTML = `
+      <div class="adi-row"><span class="adi-label">Invoice</span><span class="adi-value">${esc(currentPO.invoiceNumber) || '—'}</span></div>
+      <div class="adi-row"><span class="adi-label">Customer</span><span class="adi-value">${esc(currentPO.customer) || '—'}</span></div>
+      <div class="adi-row"><span class="adi-label">Delivery Date</span><span class="adi-value" style="color:var(--orange);">${deliveryDate}</span></div>
+      <div class="adi-row"><span class="adi-label">Dispatch Mode</span><span class="adi-value">${esc(dispatchMode)}</span></div>
+      <div class="adi-row"><span class="adi-label">Carrier</span><span class="adi-value">${esc(carrier) || '—'}</span></div>
+      <div class="adi-row"><span class="adi-label">Tracking #</span><span class="adi-value">${esc(trackingRef) || '—'}</span></div>
+      <div class="adi-row"><span class="adi-label">Delivery Address</span><span class="adi-value">${esc(deliveryAddress)}</span></div>
+    `;
+    document.getElementById('fullscreenAlert').classList.add('active');
+  }
+
+  function closeFullscreenAlert() {
+    document.getElementById('fullscreenAlert').classList.remove('active');
+    currentPO = null;
+  }
+
+  /* =====================================================
+     HELPERS
+  ===================================================== */
+  function openModal(id)  { document.getElementById(id).classList.add('active'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+  function setTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('sales-theme', theme);
+    document.getElementById('lightBtn').classList.toggle('active', theme === 'light');
+    document.getElementById('darkBtn').classList.toggle('active', theme === 'dark');
+  }
+
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+  }
+
+  // Navigation
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const page = item.getAttribute('data-page');
+      if (page === 'index')           window.location.href = 'index.html';
+      if (page === 'purchase-orders') window.location.href = 'purchase-orders.html';
+      if (page === 'finance')         window.location.href = 'finance.html';
+    });
+  });
+
+  // Live date
+  document.getElementById('liveDate').innerText = new Date().toLocaleDateString('en-US', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+  });
+
+  // Init
+  const savedTheme = localStorage.getItem('sales-theme') || 'light';
+  setTheme(savedTheme);
+  loadOrders();
+
+  // Listen for changes
+  window.addEventListener('storage', e => {
+    if (['sales_purchase_orders','finance_orders','procurement_orders'].includes(e.key)) loadOrders();
+  });
+</script>
+</body>
+</html>

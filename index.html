@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+  <title>Sales Manager | Dashboard</title>
+  <meta name="theme-color" content="#2ecc71">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <!-- jsPDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    :root {
+      --green: #2ecc71;
+      --green-dark: #1a9e52;
+      --green-light: #d4f7e4;
+      --green-glow: rgba(46, 204, 113, 0.12);
+      --red: #e74c3c;
+      --amber: #f39c12;
+      --blue: #3498db;
+      --purple: #9b59b6;
+      --yellow: #f1c40f;
+      --yellow-light: #fff9e6;
+      --orange: #e67e22;
+
+      --bg: #f4f7f5;
+      --surface: #ffffff;
+      --surface2: #f0f4f1;
+      --border: #e2ebe5;
+      --text: #1a2e22;
+      --text-secondary: #4a5f52;
+      --muted: #7a9486;
+      --sidebar-bg: #1a2e22;
+      --sidebar-text: rgba(255, 255, 255, 0.7);
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+      --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.12);
+      --radius: 20px;
+      --radius-sm: 12px;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0f1412;
+      --surface: #1a241f;
+      --surface2: #1f2c26;
+      --border: #2a3a32;
+      --text: #ecfdf5;
+      --text-secondary: #b8d9cc;
+      --muted: #7e9a8c;
+      --sidebar-bg: #0a100e;
+      --sidebar-text: rgba(255, 255, 255, 0.65);
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    body {
+      font-family: 'Inter', 'Poppins', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      transition: background 0.3s, color 0.3s;
+      overflow-x: hidden;
+    }
+
+    .app {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: 72px;
+      background: var(--sidebar-bg);
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      z-index: 200;
+      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .sidebar:hover {
+      width: 260px;
+    }
+
+    .sidebar-logo {
+      padding: 20px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .logo-img {
+      width: 42px;
+      height: 42px;
+      object-fit: contain;
+      border-radius: 12px;
+      background: white;
+      padding: 5px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 20px;
+      margin: 4px 8px;
+      border-radius: 14px;
+      color: var(--sidebar-text);
+      font-weight: 500;
+      font-size: 14px;
+      transition: all 0.2s;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .nav-item i {
+      width: 24px;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .nav-item span {
+      opacity: 0;
+      transition: opacity 0.2s 0.05s;
+    }
+
+    .sidebar:hover .nav-item span {
+      opacity: 1;
+    }
+
+    .nav-item:hover,
+    .nav-item.active {
+      background: rgba(46, 204, 113, 0.2);
+      color: #fff;
+    }
+
+    .nav-item.active i {
+      color: var(--green);
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      white-space: nowrap;
+    }
+
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--green), var(--green-dark));
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .user-details {
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .sidebar:hover .user-details {
+      opacity: 1;
+    }
+
+    .user-details h4 {
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .user-details p {
+      font-size: 10px;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    /* MAIN */
+    .main {
+      flex: 1;
+      margin-left: 72px;
+      min-width: 0;
+      width: calc(100% - 72px);
+    }
+
+    /* Header */
+    .header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .menu-btn {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 20px;
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .header-title h1 {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .header-title p {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .theme-toggle {
+      display: flex;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 30px;
+      padding: 3px;
+      gap: 2px;
+    }
+
+    .theme-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .theme-btn.active {
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      color: var(--green);
+    }
+
+    .date-badge {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      border-radius: 40px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    .avatar {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--green), var(--green-dark));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .content {
+      padding: 28px;
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+
+    /* DASHBOARD CARDS & CHARTS */
+    .welcome-banner {
+      background: linear-gradient(135deg, #1e3c2c, var(--green-dark));
+      border-radius: var(--radius);
+      padding: 28px 32px;
+      margin-bottom: 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .welcome-text h2 {
+      font-size: 26px;
+      font-weight: 800;
+      color: #fff !important;
+      letter-spacing: -0.3px;
+    }
+
+    .welcome-text p {
+      color: rgba(255, 255, 255, 0.85) !important;
+      font-size: 14px;
+    }
+
+    .welcome-stats {
+      display: flex;
+      gap: 20px;
+    }
+
+    .wstat {
+      text-align: center;
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(4px);
+      padding: 8px 24px;
+      border-radius: 28px;
+    }
+
+    .wstat-number {
+      font-size: 28px;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .wstat-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 22px;
+      margin-bottom: 32px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      transition: all 0.2s;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow);
+    }
+
+    .stat-icon {
+      width: 52px;
+      height: 52px;
+      background: var(--green-glow);
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: var(--green);
+      margin-bottom: 12px;
+    }
+
+    .stat-number {
+      font-size: 34px;
+      font-weight: 800;
+      line-height: 1;
+      margin: 8px 0 4px;
+      color: var(--green-dark);
+    }
+
+    .stat-label {
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .charts-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+
+    .chart-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+
+    .chart-card h3 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    canvas {
+      max-height: 280px;
+      width: 100%;
+    }
+
+    /* Table Styles */
+    .recent-activity {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .recent-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .recent-header h3 {
+      font-size: 18px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+      padding: 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 700px;
+    }
+
+    th {
+      text-align: left;
+      padding: 14px 20px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 14px 20px;
+      font-size: 13px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .status-sales { background: rgba(52, 152, 219, 0.15); color: #3498db; }
+    .status-finance { background: rgba(46, 204, 113, 0.15); color: #2ecc71; }
+    .status-procurement { background: rgba(241, 196, 15, 0.15); color: #f1c40f; }
+    .status-logistics { background: rgba(155, 89, 182, 0.15); color: #9b59b6; }
+    .status-delivered { background: rgba(46, 204, 113, 0.15); color: #2ecc71; }
+
+    @media (max-width: 900px) {
+
+        .header {
+        padding: 12px 16px;
+      }
+
+      .header-right {
+        flex-wrap: nowrap;
+        gap: 8px;
+      }
+
+      .date-badge {
+        display: none;
+      }
+
+      .theme-toggle {
+        transform: scale(0.9);
+      }
+
+      .notification-bell {
+        width: 36px;
+        height: 36px;
+        font-size: 16px;
+      }
+
+      .avatar {
+        width: 36px;
+        height: 36px;
+      }
+
+      .header-title h1 {
+        font-size: 16px;
+      }
+
+      .header-title p {
+        font-size: 10px;
+      }
+
+      .welcome-banner {
+        padding: 20px;
+        gap: 16px;
+      }
+
+      .welcome-text h2 {
+        font-size: 20px;
+      }
+
+      .welcome-text p {
+        font-size: 12px;
+      }
+
+      .welcome-stats {
+        gap: 12px;
+        width: 100%;
+        justify-content: center;
+      }
+
+      .wstat {
+        padding: 6px 16px;
+        flex: 1;
+        min-width: 80px;
+      }
+
+      .wstat-number {
+        font-size: 20px;
+      }
+
+      .wstat-label {
+        font-size: 9px;
+      }
+
+      .sidebar {
+        transform: translateX(-100%);
+        width: 260px;
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .sidebar.open .nav-item span,
+      .sidebar.open .user-details {
+        opacity: 1;
+      }
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+
+      .charts-row {
+        grid-template-columns: 1fr;
+      }
+
+      .main {
+        margin-left: 0;
+        width: 100%;
+      }
+
+      .menu-btn {
+        display: block;
+      }
+
+      .sidebar {
+        transform: translateX(-100%);
+        width: 260px;
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo"><img src="https://violet-leopard-500489.hostingersite.com/hr/public/assets/images/hr-logo2.jpg" alt="Logo" class="logo-img"></div>
+      <div class="nav-item active" data-page="dashboard"><i class="fas fa-chart-pie"></i><span>Dashboard</span></div>
+      <div class="nav-item" data-page="purchase-orders"><i class="fas fa-cart-shopping"></i><span>Purchase Orders</span></div>
+      <div class="nav-item" data-page="finance"><i class="fas fa-dollar"></i><span>Finance</span></div>
+      <div class="nav-item" data-page="procurements"><i class="fas fa-boxes"></i><span>Procurements</span></div>
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="user-avatar">SM</div>
+          <div class="user-details">
+            <h4>Sales Manager</h4>
+            <p>sales@thesay.ae</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+    <div class="main">
+      <header class="header">
+        <div class="header-left">
+          <button class="menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+          <div class="header-title">
+            <h1 id="pageTitle">Sales Dashboard</h1>
+            <p>Sales Manager Command Center</p>
+          </div>
+        </div>
+        <div class="header-right">
+          <div class="date-badge"><i class="far fa-calendar-alt"></i> <span id="liveDate"></span></div>
+          <div class="theme-toggle">
+            <button class="theme-btn" id="lightBtn" onclick="setTheme('light')"><i class="fas fa-sun"></i></button>
+            <button class="theme-btn" id="darkBtn" onclick="setTheme('dark')"><i class="fas fa-moon"></i></button>
+          </div>
+          <div class="avatar">SM</div>
+        </div>
+      </header>
+      <div class="content">
+        <!-- DASHBOARD -->
+        <div id="dashboardPage">
+          <div class="welcome-banner">
+            <div>
+              <h2 style="color: white;">Welcome back, Sales Manager! 📈</h2>
+              <p style="color: rgba(255, 255, 255, 0.85)">Real-time sales & procurement intelligence</p>
+            </div>
+            <div class="welcome-stats">
+              <div class="wstat">
+                <div class="wstat-number" id="totalOrdersStat">0</div>
+                <div class="wstat-label">Total Orders</div>
+              </div>
+              <div class="wstat">
+                <div class="wstat-number" id="pendingStat">0</div>
+                <div class="wstat-label">In Progress</div>
+              </div>
+              <div class="wstat">
+                <div class="wstat-number" id="deliveredStat">0</div>
+                <div class="wstat-label">Completed</div>
+              </div>
+            </div>
+          </div>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+              <div class="stat-number" id="totalPOValue">0</div>
+              <div class="stat-label">Total PO Value (AED)</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
+              <div class="stat-number" id="avgOrderValue">0</div>
+              <div class="stat-label">Avg Order Value</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon"><i class="fas fa-truck-fast"></i></div>
+              <div class="stat-number" id="procurementCount">0</div>
+              <div class="stat-label">In Procurement</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon"><i class="fas fa-check-double"></i></div>
+              <div class="stat-number" id="deliveryRate">0%</div>
+              <div class="stat-label">Delivery Rate</div>
+            </div>
+          </div>
+          <div class="charts-row">
+            <div class="chart-card">
+              <h3><i class="fas fa-chart-simple" style="color: var(--green);"></i> Sales by Status</h3>
+              <canvas id="statusChart" width="400" height="250"></canvas>
+            </div>
+            <div class="chart-card">
+              <h3><i class="fas fa-chart-line" style="color: var(--green);"></i> Weekly Orders Trend</h3>
+              <canvas id="trendChart" width="400" height="250"></canvas>
+            </div>
+          </div>
+
+          <!-- Recent Purchase Orders - Table Format -->
+          <div class="recent-activity">
+            <div class="recent-header">
+              <h3><i class="fas fa-clock"></i> Recent Purchase Orders</h3>
+            </div>
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>PO Number</th>
+                    <th>Item</th>
+                    <th>Quantity</th>
+                    <th>Total (AED)</th>
+                    <th>Status</th>
+                    <th>Vendor</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody id="recentActivityList"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Shared data - using localStorage for persistence between pages
+    let purchaseOrders = [];
+
+    function loadData() {
+      const stored = localStorage.getItem('sales_purchase_orders');
+      if (stored) {
+        purchaseOrders = JSON.parse(stored);
+      } else {
+        purchaseOrders = [{
+            id: 1,
+            poNumber: 'PO-2024-001',
+            item: 'Laptop Computers',
+            quantity: 10,
+            price: 2500,
+            total: 25000,
+            status: 'finance',
+            vendor: 'ABC Electronics',
+            customer: 'Company A',
+            assignDate: '2024-03-26',
+            paymentOption: 'Bank Transfer',
+            pdfBlobUrl: null,
+            createdAt: '2024-03-25'
+          },
+          {
+            id: 2,
+            poNumber: 'PO-2024-002',
+            item: 'Office Chairs',
+            quantity: 25,
+            price: 450,
+            total: 11250,
+            status: 'procurement',
+            vendor: 'Tech Solutions LLC',
+            customer: 'Company B',
+            assignDate: '2024-03-27',
+            paymentOption: 'Advance Payment',
+            pdfBlobUrl: null,
+            createdAt: '2024-03-26'
+          },
+          {
+            id: 3,
+            poNumber: 'PO-2024-003',
+            item: 'Printers',
+            quantity: 5,
+            price: 1200,
+            total: 6000,
+            status: 'sales',
+            vendor: null,
+            customer: null,
+            assignDate: null,
+            paymentOption: null,
+            pdfBlobUrl: null,
+            createdAt: '2024-03-28'
+          }
+        ];
+        saveData();
+      }
+    }
+
+    function saveData() {
+      localStorage.setItem('sales_purchase_orders', JSON.stringify(purchaseOrders));
+    }
+
+    const statusFlow = ['sales', 'finance', 'procurement', 'logistics', 'delivered'];
+    const statusLabels = {
+      sales: 'Sales',
+      finance: 'Finance',
+      procurement: 'Procurement',
+      logistics: 'Logistics',
+      delivered: 'Delivered'
+    };
+    let statusChart, trendChart;
+
+    function updateDashboard() {
+      let total = purchaseOrders.length,
+        pending = purchaseOrders.filter(p => p.status !== 'delivered').length,
+        delivered = purchaseOrders.filter(p => p.status === 'delivered').length;
+      let totalVal = purchaseOrders.reduce((s, o) => s + o.total, 0);
+      let avg = total ? totalVal / total : 0;
+      let procurement = purchaseOrders.filter(p => p.status === 'procurement').length;
+      let deliveryRate = total ? (delivered / total) * 100 : 0;
+      
+      document.getElementById('totalOrdersStat').innerText = total;
+      document.getElementById('pendingStat').innerText = pending;
+      document.getElementById('deliveredStat').innerText = delivered;
+      document.getElementById('totalPOValue').innerText = totalVal.toLocaleString();
+      document.getElementById('avgOrderValue').innerText = Math.round(avg).toLocaleString();
+      document.getElementById('procurementCount').innerText = procurement;
+      document.getElementById('deliveryRate').innerText = Math.round(deliveryRate);
+
+      // Recent Purchase Orders - Table format
+      let recent = [...purchaseOrders].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 10);
+      document.getElementById('recentActivityList').innerHTML = recent.map(po => `
+        <tr>
+          <td><strong>${po.poNumber}</strong></td>
+          <td>${po.item}</td>
+          <td>${po.quantity}</td>
+          <td>AED ${po.total.toLocaleString()}</td>
+          <td><span class="status-badge status-${po.status}">${statusLabels[po.status]}</span></td>
+          <td>${po.vendor || '-'}</td>
+          <td>${new Date(po.createdAt).toLocaleDateString()}</td>
+        </tr>
+      `).join('');
+      
+      updateCharts();
+    }
+
+    function updateCharts() {
+      let counts = statusFlow.map(s => purchaseOrders.filter(p => p.status === s).length);
+      if (statusChart) statusChart.destroy();
+      statusChart = new Chart(document.getElementById('statusChart'), {
+        type: 'doughnut',
+        data: {
+          labels: statusFlow.map(s => statusLabels[s]),
+          datasets: [{
+            data: counts,
+            backgroundColor: ['#3498db', '#2ecc71', '#f1c40f', '#9b59b6', '#27ae60'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'bottom'
+            }
+          }
+        }
+      });
+      
+      let last7 = Array(7).fill(0);
+      purchaseOrders.forEach(po => {
+        let diff = Math.floor((new Date() - new Date(po.createdAt)) / (1000 * 60 * 60 * 24));
+        if (diff >= 0 && diff < 7) last7[6 - diff] += po.total;
+      });
+      if (trendChart) trendChart.destroy();
+      trendChart = new Chart(document.getElementById('trendChart'), {
+        type: 'line',
+        data: {
+          labels: ['6d ago', '5d', '4d', '3d', '2d', 'Yesterday', 'Today'],
+          datasets: [{
+            label: 'Order Value (AED)',
+            data: last7,
+            borderColor: '#2ecc71',
+            tension: 0.3,
+            fill: true,
+            backgroundColor: 'rgba(46,204,113,0.1)'
+          }]
+        },
+        options: {
+          responsive: true
+        }
+      });
+    }
+
+    function setTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('sales-theme', theme);
+      document.getElementById('lightBtn').classList.toggle('active', theme === 'light');
+      document.getElementById('darkBtn').classList.toggle('active', theme === 'dark');
+    }
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('open');
+    }
+
+    // Navigation to purchase orders page
+    document.querySelectorAll('.nav-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const page = item.getAttribute('data-page');
+        if (page === 'purchase-orders') {
+          window.location.href = 'purchase-orders.html';
+        } else if (page === 'finance') {
+            window.location.href = 'finance.html'
+        } else if (page === 'procurements') {
+            window.location.href = 'procurements.html'
+        }
+      });
+    });
+
+    document.getElementById('liveDate').innerText = new Date().toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+
+    let savedTheme = localStorage.getItem('sales-theme') || 'light';
+    setTheme(savedTheme);
+    loadData();
+    updateDashboard();
+
+    // Refresh data periodically
+    window.addEventListener('storage', function(e) {
+      if (e.key === 'sales_purchase_orders') {
+        loadData();
+        updateDashboard();
+      }
+    });
+  </script>
+</body>
+
+</html>
