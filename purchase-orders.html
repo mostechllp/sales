@@ -490,7 +490,7 @@
       border-radius: var(--radius);
       padding: 28px;
       width: 90%;
-      max-width: 520px;
+      max-width: 560px;
       max-height: 85vh;
       overflow-y: auto;
     }
@@ -608,6 +608,22 @@
       cursor: pointer;
       display: block;
       margin-bottom: 16px;
+      transition: 0.2s;
+    }
+
+    .file-upload-label:hover {
+      background: var(--surface);
+      border-color: var(--green-dark);
+    }
+
+    .attachment-preview {
+      font-size: 12px;
+      margin-top: -8px;
+      margin-bottom: 12px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     /* ── PIPELINE BANNER ── */
@@ -710,12 +726,6 @@
         transform: scale(0.9);
       }
 
-      .notification-bell {
-        width: 36px;
-        height: 36px;
-        font-size: 16px;
-      }
-
       .avatar {
         width: 36px;
         height: 36px;
@@ -727,39 +737,6 @@
 
       .header-title p {
         font-size: 10px;
-      }
-
-      .welcome-banner {
-        padding: 20px;
-        gap: 16px;
-      }
-
-      .welcome-text h2 {
-        font-size: 20px;
-      }
-
-      .welcome-text p {
-        font-size: 12px;
-      }
-
-      .welcome-stats {
-        gap: 12px;
-        width: 100%;
-        justify-content: center;
-      }
-
-      .wstat {
-        padding: 6px 16px;
-        flex: 1;
-        min-width: 80px;
-      }
-
-      .wstat-number {
-        font-size: 20px;
-      }
-
-      .wstat-label {
-        font-size: 9px;
       }
 
       .sidebar {
@@ -797,16 +774,6 @@
       .search-box input {
         font-size: 0.8rem;
         padding: 6px;
-      }
-
-
-      .sidebar {
-        transform: translateX(-100%);
-        width: 260px;
-      }
-
-      .sidebar.open {
-        transform: translateX(0);
       }
     }
   </style>
@@ -855,7 +822,7 @@
         <div id="purchaseOrdersPage">
           <div class="page-header">
             <h2><i class="fas fa-file-pdf"></i> Purchase Orders Management</h2>
-            <p>Create, assign vendors & track all orders</p>
+            <p>Create, track all orders</p>
           </div>
           <!-- ORDER PIPELINE -->
           <div class="pipeline">
@@ -903,7 +870,6 @@
                     <th>Vendor/Manufacturer</th>
                     <th>Customer</th>
                     <th>Payment</th>
-                    <th>PDF</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -916,63 +882,68 @@
     </div>
   </div>
 
-  <!-- Modals -->
+  <!-- SINGLE MODAL: CREATE PO with ALL FIELDS (Vendor, Customer, Payment, Date, Attachment) -->
   <div id="createPOModal" class="modal">
     <div class="modal-content">
-
       <h3><i class="fas fa-plus-circle"></i> Create Purchase Order</h3>
-      <input type="text" id="poNumberInput" placeholder="PO Number *">
+      <input type="text" id="poNumberInput" placeholder="PO Number *" autocomplete="off">
       <input type="text" id="poItem" placeholder="Item name *">
       <div class="form-row">
         <div><input type="number" id="poQuantity" placeholder="Quantity *"></div>
         <div><input type="number" id="poPrice" placeholder="Unit Price (AED) *"></div>
       </div>
-
+      <div class="form-row">
+        <div><select id="vendorSelect">
+            <option value="">Vendor / Manufacturer *</option>
+            <option value="Piramal">Piramal</option>
+            <option value="Conturavet">Conturavet</option>
+            <option value="Univet">Univet</option>
+          </select></div>
+        <div><select id="customerSelect">
+            <option value="">Customer *</option>
+            <option value="AB Pharma Ethiopia">AB Pharma Ethiopia</option>
+            <option value="BC Pharma">BC Pharma</option>
+            <option value="CD Pharma">CD Pharma</option>
+          </select></div>
+      </div>
+      <!-- Replace the existing payment select in the modal with this -->
+      <div class="form-row">
+        <div style="flex:1">
+          <input type="date" id="assignDateInput" placeholder="Order Date *">
+        </div>
+        <div style="flex:1">
+          <select id="paymentSelect">
+            <option value="">Payment Option *</option>
+            <option value="Advance Payment">Advance Payment</option>
+            <option value="COD">COD</option>
+            <option value="LC">Letter of Credit</option>
+            <option value="Bank Transfer">Bank Transfer</option>
+            <option value="Other">Other (Specify)</option>
+          </select>
+        </div>
+      </div>
+      <div id="otherPaymentDiv" style="display:none; margin-bottom:16px;">
+        <input type="text" id="otherPaymentText" placeholder="Please specify payment method *">
+      </div>
       <label class="file-upload-label">
         <i class="fas fa-paperclip"></i> Attach File (Optional)
-        <input type="file" id="poAttachment" style="display:none;" onchange="handlePOAttachment(event)">
+        <input type="file" id="poAttachmentFile" style="display:none;" accept="image/*,application/pdf,.doc,.docx">
       </label>
-      <div class="modal-buttons"><button class="cancel" onclick="closeCreatePOModal()">Cancel</button><button class="confirm" onclick="createPurchaseOrder()">Create PO</button></div>
-    </div>
-  </div>
-
-  <div id="assignVendorModal" class="modal">
-    <div class="modal-content">
-      <h3><i class="fas fa-handshake"></i> Assign to Vendor & Upload PDF</h3><select id="vendorType">
-        <option value="">Select Manufacturer/Vendor *</option>
-        <option value="Piramal">Piramal</option>
-        <option value="Conturavet">Conturavet</option>
-        <option value="Univet">Univet</option>
-      </select><select id="customerType">
-        <option value="">Select Customer *</option>
-        <option value="AB Pharma Ethiopia">AB Pharma Ethiopia</option>
-        <option value="BC Pharma">BC Pharma</option>
-        <option value="CD Pharma">CD Pharma</option>
-      </select><input type="date" id="assignDate"><select id="paymentOption">
-        <option value="">Payment Option *</option>
-        <option value="Advance Payment">Advance Payment</option>
-        <option value="COD">COD</option>
-        <option value="LC">Letter of Credit</option>
-        <option value="Bank Transfer">Bank Transfer</option>
-      </select>
-      <label class="file-upload-label"><i class="fas fa-upload"></i> Upload Generated PDF (Optional)<input type="file" id="pdfUpload" accept="application/pdf" style="display:none;" onchange="handlePDFUpload(event)"></label>
-      <div id="uploadStatus" style="font-size:12px; margin-bottom:12px;"></div>
-      <div class="modal-buttons"><button class="cancel" onclick="closeAssignVendorModal()">Cancel</button><button class="confirm" onclick="assignToVendor()">Assign & Forward</button></div>
+      <div id="attachmentPreview" class="attachment-preview"></div>
+      <div class="modal-buttons"><button class="cancel" onclick="closeCreatePOModal()">Cancel</button><button class="confirm" onclick="createSinglePurchaseOrder()">Create PO</button></div>
     </div>
   </div>
 
   <div id="fullscreenAlert" class="fullscreen-alert">
     <div class="alert-content"><i class="fas fa-check-circle"></i>
-      <h3>Order Passed to Finance</h3>
-      <p>Purchase order assigned successfully! Vendor & details updated.</p><button onclick="closeFullscreenAlert()">Continue</button>
+      <h3>Purchase Order Created!</h3>
+      <p>PO has been successfully created and is now in Sales pipeline.</p><button onclick="closeFullscreenAlert()">Continue</button>
     </div>
   </div>
 
   <script>
     let purchaseOrders = [];
     let poSearchTerm = '';
-    let currentAssignPO = null;
-    let uploadedPDFData = null;
 
     const statusFlow = ['sales', 'finance', 'procurement', 'logistics', 'delivered'];
     const statusLabels = {
@@ -1000,7 +971,7 @@
             customer: 'AB Pharma Ethiopia',
             assignDate: '2024-03-26',
             paymentOption: 'Bank Transfer',
-            pdfBlobUrl: null,
+            attachment: null,
             createdAt: '2024-03-25'
           },
           {
@@ -1015,7 +986,7 @@
             customer: 'BC Pharma',
             assignDate: '2024-03-27',
             paymentOption: 'Advance Payment',
-            pdfBlobUrl: null,
+            attachment: null,
             createdAt: '2024-03-26'
           },
           {
@@ -1030,7 +1001,7 @@
             customer: null,
             assignDate: null,
             paymentOption: null,
-            pdfBlobUrl: null,
+            attachment: null,
             createdAt: '2024-03-28'
           }
         ];
@@ -1041,44 +1012,55 @@
     document.querySelectorAll('.nav-item').forEach(item => {
       item.addEventListener('click', () => {
         const page = item.getAttribute('data-page');
-        if (page === 'finance') {
-          window.location.href = 'finance.html'
-        }
-        if (page === 'procurements') {
-          window.location.href = 'procurements.html'
-        }
-        if (page === 'logistics') {
-          window.location.href = 'logistics.html'
-        }
+        if (page === 'finance') window.location.href = 'finance.html';
+        if (page === 'procurements') window.location.href = 'procurements.html';
+        if (page === 'logistics') window.location.href = 'logistics.html';
+        if (page === 'index') window.location.href = 'index.html';
       });
     });
 
+    // Add this function to handle payment option change
+    function toggleOtherPayment() {
+      const paymentSelect = document.getElementById('paymentSelect');
+      const otherDiv = document.getElementById('otherPaymentDiv');
+      if (paymentSelect.value === 'Other') {
+        otherDiv.style.display = 'block';
+        document.getElementById('otherPaymentText').required = true;
+      } else {
+        otherDiv.style.display = 'none';
+        document.getElementById('otherPaymentText').required = false;
+        document.getElementById('otherPaymentText').value = '';
+      }
+    }
+
+    // Add event listener when modal opens
+    function setupPaymentListener() {
+      const paymentSelect = document.getElementById('paymentSelect');
+      paymentSelect.removeEventListener('change', toggleOtherPayment);
+      paymentSelect.addEventListener('change', toggleOtherPayment);
+    }
 
     function saveData() {
       localStorage.setItem('sales_purchase_orders', JSON.stringify(purchaseOrders));
     }
 
-    function getNextStatus(s) {
-      let idx = statusFlow.indexOf(s);
-      return idx < statusFlow.length - 1 ? statusFlow[idx + 1] : s;
-    }
+    let currentAttachmentUrl = null;
+    let currentAttachmentName = '';
 
-    let poAttachmentData = null;
-
-    function handlePOAttachment(event) {
-      let file = event.target.files[0];
-
+    // handle file selection for the create modal
+    document.getElementById('poAttachmentFile').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      const previewDiv = document.getElementById('attachmentPreview');
       if (file) {
-        let url = URL.createObjectURL(file);
-        poAttachmentData = url;
-
-        document.getElementById('attachmentStatus').innerHTML =
-          `<i class="fas fa-check-circle"></i> ${file.name} attached`;
+        currentAttachmentUrl = URL.createObjectURL(file);
+        currentAttachmentName = file.name;
+        previewDiv.innerHTML = `<i class="fas fa-file"></i> ${file.name} attached`;
       } else {
-        poAttachmentData = null;
-        document.getElementById('attachmentStatus').innerHTML = '';
+        currentAttachmentUrl = null;
+        currentAttachmentName = '';
+        previewDiv.innerHTML = '';
       }
-    }
+    });
 
     function escapeHtml(text) {
       if (!text) return '';
@@ -1090,7 +1072,12 @@
     }
 
     function renderPurchaseOrders() {
-      let filtered = purchaseOrders.filter(po => po.poNumber.toLowerCase().includes(poSearchTerm) || po.item.toLowerCase().includes(poSearchTerm) || (po.vendor && po.vendor.toLowerCase().includes(poSearchTerm)) || (po.customer && po.customer.toLowerCase().includes(poSearchTerm)));
+      let filtered = purchaseOrders.filter(po =>
+        po.poNumber.toLowerCase().includes(poSearchTerm) ||
+        po.item.toLowerCase().includes(poSearchTerm) ||
+        (po.vendor && po.vendor.toLowerCase().includes(poSearchTerm)) ||
+        (po.customer && po.customer.toLowerCase().includes(poSearchTerm))
+      );
       let tbody = document.getElementById('poTableBody');
       tbody.innerHTML = filtered.map(po => `
         <tr>
@@ -1098,22 +1085,13 @@
           <td>${escapeHtml(po.item)}</td>
           <td>${po.quantity}</td>
           <td>AED ${po.total.toLocaleString()}</td>
-          <td>
-  ${po.attachment 
-    ? `<a href="${po.attachment}" target="_blank" style="color:var(--blue);">
-         <i class="fas fa-paperclip"></i> View
-       </a>` 
-    : '—'}
-</td>
+          <td>${po.attachment ? `<a href="${po.attachment}" target="_blank" style="color:var(--blue);"><i class="fas fa-paperclip"></i> View</a>` : '—'}</td>
           <td><span class="status-badge status-${po.status}">${statusLabels[po.status]}</span></td>
           <td>${po.vendor || '—'}</td>
           <td>${po.customer || '—'}</td>
           <td>${po.paymentOption || '—'}</td>
-          <td>${po.pdfBlobUrl ? `<a href="${po.pdfBlobUrl}" download="${po.poNumber}.pdf" style="color:var(--green);"><i class="fas fa-download"></i> PDF</a>` : '<span class="muted">—</span>'}</td>
-          <td>
-            ${po.status === 'sales' && !po.vendor ? `<button class="action-btn assign" onclick="openAssignVendorModal(${po.id})" title="Assign Vendor"><i class="fas fa-truck"></i></button>` : po.status !== 'delivered' ? `<button class="action-btn" disabled style="opacity:0.5"><i class="fas fa-clock"></i> ${getNextStatus(po.status)}</button>` : `<i class="fas fa-check-circle" style="color:var(--green);"></i> Completed`}
-           </td>
-         </tr>
+          <td><i class="fas fa-check-circle" style="color:var(--green);"></i> Created</td>
+        </tr>
       `).join('');
     }
 
@@ -1122,68 +1100,65 @@
       renderPurchaseOrders();
     }
 
-    function generatePDF(po) {
-      const {
-        jsPDF
-      } = window.jspdf;
-      const doc = new jsPDF();
-      doc.setFillColor(46, 204, 113);
-      doc.rect(0, 0, 210, 40, 'F');
-      doc.setTextColor(255, 255, 255);
-      doc.setFontSize(20);
-      doc.text('PURCHASE ORDER', 105, 25, {
-        align: 'center'
-      });
-      doc.setTextColor(0, 0, 0);
-      doc.setFontSize(10);
-      doc.text('THESAY', 14, 55);
-      doc.text('Dubai, UAE', 14, 62);
-      doc.text('Tel: +971 000000000', 14, 69);
-      doc.setFontSize(11);
-      doc.setFont(undefined, 'bold');
-      doc.text('PO Number:', 140, 55);
-      doc.text('Date:', 140, 62);
-      doc.setFont(undefined, 'normal');
-      doc.text(po.poNumber, 180, 55);
-      doc.text(new Date().toLocaleDateString(), 180, 62);
-      doc.line(14, 75, 196, 75);
-      doc.setFont(undefined, 'bold');
-      doc.text('Item Description', 20, 90);
-      doc.text('Quantity', 100, 90);
-      doc.text('Unit Price', 130, 90);
-      doc.text('Total', 160, 90);
-      doc.line(14, 95, 196, 95);
-      doc.setFont(undefined, 'normal');
-      doc.text(po.item, 20, 110);
-      doc.text(po.quantity.toString(), 105, 110);
-      doc.text(po.price.toLocaleString(), 135, 110);
-      doc.text(po.total.toLocaleString(), 165, 110);
-      doc.line(14, 120, 196, 120);
-      doc.setFont(undefined, 'bold');
-      doc.text('Total Amount:', 140, 135);
-      doc.text(`AED ${po.total.toLocaleString()}`, 180, 135);
-      doc.setFontSize(8);
-      doc.setTextColor(128, 128, 128);
-      doc.text('Generated by Sales Manager', 105, 280, {
-        align: 'center'
-      });
-      const blob = doc.output('blob');
-      const url = URL.createObjectURL(blob);
-      return url;
+    function openCreatePOModal() {
+      // reset fields
+      document.getElementById('poNumberInput').value = '';
+      document.getElementById('poItem').value = '';
+      document.getElementById('poQuantity').value = '';
+      document.getElementById('poPrice').value = '';
+      document.getElementById('vendorSelect').value = '';
+      document.getElementById('customerSelect').value = '';
+      document.getElementById('assignDateInput').value = '';
+      document.getElementById('paymentSelect').value = '';
+      document.getElementById('otherPaymentDiv').style.display = 'none';
+      document.getElementById('otherPaymentText').value = '';
+      document.getElementById('poAttachmentFile').value = '';
+      document.getElementById('attachmentPreview').innerHTML = '';
+      currentAttachmentUrl = null;
+      currentAttachmentName = '';
+      document.getElementById('createPOModal').classList.add('active');
+      setupPaymentListener();
     }
 
-    function createPurchaseOrder() {
-      let item = document.getElementById('poItem').value.trim(),
-        quantity = parseInt(document.getElementById('poQuantity').value),
-        price = parseFloat(document.getElementById('poPrice').value);
-      if (!item || !quantity || !price) return alert('Fill all fields');
+    function closeCreatePOModal() {
+      document.getElementById('createPOModal').classList.remove('active');
+    }
+
+    function closeFullscreenAlert() {
+      document.getElementById('fullscreenAlert').classList.remove('active');
+    }
+
+    function createSinglePurchaseOrder() {
+      // get all fields
       let poNumber = document.getElementById('poNumberInput').value.trim();
+      let item = document.getElementById('poItem').value.trim();
+      let quantity = parseInt(document.getElementById('poQuantity').value);
+      let price = parseFloat(document.getElementById('poPrice').value);
+      let vendor = document.getElementById('vendorSelect').value;
+      let customer = document.getElementById('customerSelect').value;
+      let assignDate = document.getElementById('assignDateInput').value;
+      let paymentOption = document.getElementById('paymentSelect').value;
+      if (paymentOption === 'Other') {
+        paymentOption = document.getElementById('otherPaymentText').value.trim();
+        if (!paymentOption) return alert('Please specify the payment method');
+      }
 
       if (!poNumber) return alert('PO Number is required');
+      if (!item) return alert('Item name is required');
+      if (isNaN(quantity) || quantity <= 0) return alert('Valid quantity required');
+      if (isNaN(price) || price <= 0) return alert('Valid unit price required');
+      if (!vendor) return alert('Please select a vendor/manufacturer');
+      if (!customer) return alert('Please select a customer');
+      if (!assignDate) return alert('Order date is required');
+      if (!paymentOption) return alert('Payment option is required');
+
+      // check duplicate PO Number
       let exists = purchaseOrders.some(po => po.poNumber === poNumber);
-      if (exists) return alert('PO Number already exists');
+      if (exists) return alert('PO Number already exists. Use a unique number.');
 
       let total = quantity * price;
+      let attachmentUrl = currentAttachmentUrl ? currentAttachmentUrl : null;
+
       let newPO = {
         id: Date.now(),
         poNumber,
@@ -1192,95 +1167,21 @@
         price,
         total,
         status: 'sales',
-        vendor: null,
-        customer: null,
-        assignDate: null,
-        paymentOption: null,
-        pdfBlobUrl: null,
-        attachment: poAttachmentData,
+        vendor: vendor,
+        customer: customer,
+        assignDate: assignDate,
+        paymentOption: paymentOption,
+        attachment: attachmentUrl,
         createdAt: new Date().toISOString()
       };
-      let pdfUrl = generatePDF(newPO);
-      newPO.pdfBlobUrl = pdfUrl;
+
       purchaseOrders.unshift(newPO);
       saveData();
       renderPurchaseOrders();
       closeCreatePOModal();
-      alert(`PO ${poNumber} created & PDF ready!`);
-    }
 
-    function viewPurchaseOrder(id) {
-      let po = purchaseOrders.find(p => p.id === id);
-      if (po) alert(`PO: ${po.poNumber}\nItem: ${po.item}\nQty: ${po.quantity}\nTotal: AED ${po.total.toLocaleString()}\nStatus: ${statusLabels[po.status]}\nVendor: ${po.vendor || 'Not assigned'}\nCustomer: ${po.customer || '—'}\nPayment: ${po.paymentOption || '—'}`);
-    }
-
-    function openCreatePOModal() {
-      document.getElementById('createPOModal').classList.add('active');
-    }
-
-    function closeCreatePOModal() {
-      document.getElementById('createPOModal').classList.remove('active');
-      document.getElementById('poNumberInput').value = '';
-      document.getElementById('poItem').value = '';
-      document.getElementById('poQuantity').value = '';
-      document.getElementById('poPrice').value = '';
-      poAttachmentData = null;
-      document.getElementById('poAttachment').value = '';
-      document.getElementById('attachmentStatus').innerHTML = '';
-    }
-
-    function openAssignVendorModal(poId) {
-      currentAssignPO = purchaseOrders.find(p => p.id === poId);
-      if (currentAssignPO) {
-        document.getElementById('assignVendorModal').classList.add('active');
-        uploadedPDFData = null;
-        document.getElementById('uploadStatus').innerHTML = '';
-        document.getElementById('pdfUpload').value = '';
-      }
-    }
-
-    function closeAssignVendorModal() {
-      document.getElementById('assignVendorModal').classList.remove('active');
-      currentAssignPO = null;
-      uploadedPDFData = null;
-      document.getElementById('pdfUpload').value = '';
-    }
-
-    function handlePDFUpload(event) {
-      let file = event.target.files[0];
-      if (file && file.type === 'application/pdf') {
-        let url = URL.createObjectURL(file);
-        uploadedPDFData = url;
-        document.getElementById('uploadStatus').innerHTML = '<i class="fas fa-check-circle"></i> PDF uploaded';
-      } else {
-        uploadedPDFData = null;
-        document.getElementById('uploadStatus').innerHTML = 'Invalid file';
-      }
-    }
-
-    function assignToVendor() {
-      let vendor = document.getElementById('vendorType').value,
-        customer = document.getElementById('customerType').value,
-        assignDate = document.getElementById('assignDate').value,
-        payment = document.getElementById('paymentOption').value;
-      if (!vendor || !customer || !assignDate || !payment) return alert('Fill all fields');
-      if (currentAssignPO) {
-        currentAssignPO.vendor = vendor;
-        currentAssignPO.customer = customer;
-        currentAssignPO.assignDate = assignDate;
-        currentAssignPO.paymentOption = payment;
-        if (uploadedPDFData) currentAssignPO.pdfBlobUrl = uploadedPDFData;
-        let next = getNextStatus(currentAssignPO.status);
-        currentAssignPO.status = next;
-        saveData();
-        renderPurchaseOrders();
-        closeAssignVendorModal();
-        document.getElementById('fullscreenAlert').classList.add('active');
-      }
-    }
-
-    function closeFullscreenAlert() {
-      document.getElementById('fullscreenAlert').classList.remove('active');
+      // show fullscreen alert after creation
+      document.getElementById('fullscreenAlert').classList.add('active');
     }
 
     function setTheme(theme) {
@@ -1294,16 +1195,6 @@
       document.getElementById('sidebar').classList.toggle('open');
     }
 
-    // Navigation to dashboard
-    document.querySelectorAll('.nav-item').forEach(item => {
-      item.addEventListener('click', () => {
-        const page = item.getAttribute('data-page');
-        if (page === 'index') {
-          window.location.href = 'index.html';
-        }
-      });
-    });
-
     document.getElementById('liveDate').innerText = new Date().toLocaleDateString('en-US', {
       weekday: 'long',
       year: 'numeric',
@@ -1316,7 +1207,6 @@
     loadData();
     renderPurchaseOrders();
 
-    // Listen for storage changes from other tab
     window.addEventListener('storage', function(e) {
       if (e.key === 'sales_purchase_orders') {
         loadData();
