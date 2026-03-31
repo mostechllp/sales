@@ -44,6 +44,10 @@
       --radius: 20px;
       --radius-sm: 12px;
       --card-border: 1px solid rgba(0, 0, 0, 0.03);
+
+      --indigo: #5c6bc0;
+      --indigo-dark: #3949ab;
+      --indigo-light: rgba(92,107,192,0.12);
     }
 
     [data-theme="dark"] {
@@ -787,6 +791,39 @@
       transform: translateY(-2px);
     }
 
+    /* ── PIPELINE BANNER ── */
+    .pipeline {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 20px 28px;
+      margin-bottom: 28px; overflow-x: auto;
+    }
+    .pipeline-inner {
+      display: flex; align-items: center; gap: 0;
+      min-width: 600px;
+    }
+    .pipe-step {
+      display: flex; flex-direction: column; align-items: center;
+      flex: 1; position: relative; cursor: default;
+    }
+    .pipe-dot {
+      width: 38px; height: 38px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; font-weight: 700; margin-bottom: 8px;
+      border: 2px solid var(--border);
+      background: var(--surface2); color: var(--muted);
+      transition: all 0.3s;
+    }
+    .pipe-step.done   .pipe-dot { background: var(--green);  color: #fff; border-color: var(--green); }
+    .pipe-step.active .pipe-dot { background: var(--indigo); color: #fff; border-color: var(--indigo); box-shadow: 0 0 0 4px rgba(92,107,192,0.2); }
+    .pipe-label { font-size: 11px; font-weight: 600; color: var(--muted); text-align: center; }
+    .pipe-step.done   .pipe-label { color: var(--green); }
+    .pipe-step.active .pipe-label { color: var(--indigo); }
+    .pipe-line {
+      flex: 1; height: 2px; background: var(--border);
+      margin-bottom: 22px; transition: background 0.3s;
+    }
+    .pipe-line.done { background: var(--green); }
+
     /* MOBILE */
     @media (max-width: 900px) {
       .header {
@@ -870,6 +907,7 @@
       <div class="nav-item" data-page="index"><i class="fas fa-chart-pie"></i><span>Dashboard</span></div>
       <div class="nav-item" data-page="purchase-orders"><i class="fas fa-cart-shopping"></i><span>Purchase Orders</span></div>
       <div class="nav-item active" data-page="finance"><i class="fas fa-file-invoice-dollar"></i><span>Finance</span></div>
+      <div class="nav-item" data-page="logistics"><i class="fas fa-truck"></i><span>Logistics</span></div>
       <div class="nav-item" data-page="procurements"><i class="fas fa-boxes"></i><span>Procurements</span></div>
 
       <div class="sidebar-footer">
@@ -907,6 +945,36 @@
           <h2><i class="fas fa-file-invoice-dollar"></i> Finance — Orders from Sales</h2>
           <p>Review orders passed from Sales, generate invoices & forward to Procurement</p>
         </div>
+
+        <!-- ORDER PIPELINE -->
+      <div class="pipeline">
+        <div class="pipeline-inner">
+          <div class="pipe-step done">
+            <div class="pipe-dot"><i class="fas fa-cart-shopping"></i></div>
+            <div class="pipe-label">Sales</div>
+          </div>
+          <div class="pipe-line done"></div>
+          <div class="pipe-step active">
+            <div class="pipe-dot"><i class="fas fa-file-invoice-dollar"></i></div>
+            <div class="pipe-label">Finance</div>
+          </div>
+          <div class="pipe-line"></div>
+          <div class="pipe-step">
+            <div class="pipe-dot"><i class="fas fa-boxes-stacked"></i></div>
+            <div class="pipe-label">Procurement</div>
+          </div>
+          <div class="pipe-line"></div>
+          <div class="pipe-step">
+            <div class="pipe-dot"><i class="fas fa-truck-fast"></i></div>
+            <div class="pipe-label">Logistics</div>
+          </div>
+          <div class="pipe-line"></div>
+          <div class="pipe-step" id="finalPipeStep">
+            <div class="pipe-dot"><i class="fas fa-circle-check"></i></div>
+            <div class="pipe-label">Delivered</div>
+          </div>
+        </div>
+      </div>
 
         <!-- Summary Cards -->
         <div class="summary-cards">
@@ -1541,6 +1609,8 @@
         if (page === 'purchase-orders') window.location.href = 'purchase-orders.html';
         else if (page === 'procurements') {
           window.location.href = 'procurements.html'
+        } else if (page === 'logistics') {
+          window.location.href = 'logistics.html'
         }
       });
     });
