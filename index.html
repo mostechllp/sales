@@ -493,15 +493,34 @@
       font-weight: 600;
     }
 
-    .status-sales { background: rgba(52, 152, 219, 0.15); color: #3498db; }
-    .status-finance { background: rgba(46, 204, 113, 0.15); color: #2ecc71; }
-    .status-procurement { background: rgba(241, 196, 15, 0.15); color: #f1c40f; }
-    .status-logistics { background: rgba(155, 89, 182, 0.15); color: #9b59b6; }
-    .status-delivered { background: rgba(46, 204, 113, 0.15); color: #2ecc71; }
+    .status-sales {
+      background: rgba(52, 152, 219, 0.15);
+      color: #3498db;
+    }
+
+    .status-finance {
+      background: rgba(46, 204, 113, 0.15);
+      color: #2ecc71;
+    }
+
+    .status-procurement {
+      background: rgba(241, 196, 15, 0.15);
+      color: #f1c40f;
+    }
+
+    .status-logistics {
+      background: rgba(155, 89, 182, 0.15);
+      color: #9b59b6;
+    }
+
+    .status-delivered {
+      background: rgba(46, 204, 113, 0.15);
+      color: #2ecc71;
+    }
 
     @media (max-width: 900px) {
 
-        .header {
+      .header {
         padding: 12px 16px;
       }
 
@@ -583,6 +602,7 @@
       .sidebar.open .user-details {
         opacity: 1;
       }
+
       .stats-grid {
         grid-template-columns: 1fr;
       }
@@ -745,7 +765,7 @@
         purchaseOrders = [{
             id: 1,
             poNumber: 'PO-2024-001',
-            item: 'Laptop Computers',
+            item: 'Sevoflurane',
             quantity: 10,
             price: 2500,
             total: 25000,
@@ -760,7 +780,7 @@
           {
             id: 2,
             poNumber: 'PO-2024-002',
-            item: 'Office Chairs',
+            item: 'Isoflurane',
             quantity: 25,
             price: 450,
             total: 11250,
@@ -775,7 +795,7 @@
           {
             id: 3,
             poNumber: 'PO-2024-003',
-            item: 'Printers',
+            item: 'Arthramid',
             quantity: 5,
             price: 1200,
             total: 6000,
@@ -814,7 +834,7 @@
       let avg = total ? totalVal / total : 0;
       let procurement = purchaseOrders.filter(p => p.status === 'procurement').length;
       let deliveryRate = total ? (delivered / total) * 100 : 0;
-      
+
       document.getElementById('totalOrdersStat').innerText = total;
       document.getElementById('pendingStat').innerText = pending;
       document.getElementById('deliveredStat').innerText = delivered;
@@ -836,7 +856,7 @@
           <td>${new Date(po.createdAt).toLocaleDateString()}</td>
         </tr>
       `).join('');
-      
+
       updateCharts();
     }
 
@@ -862,7 +882,7 @@
           }
         }
       });
-      
+
       let last7 = Array(7).fill(0);
       purchaseOrders.forEach(po => {
         let diff = Math.floor((new Date() - new Date(po.createdAt)) / (1000 * 60 * 60 * 24));
@@ -906,11 +926,11 @@
         if (page === 'purchase-orders') {
           window.location.href = 'purchase-orders.html';
         } else if (page === 'finance') {
-            window.location.href = 'finance.html'
+          window.location.href = 'finance.html'
         } else if (page === 'procurements') {
-            window.location.href = 'procurements.html'
+          window.location.href = 'procurements.html'
         } else if (page === 'logistics') {
-            window.location.href = 'logistics.html'
+          window.location.href = 'logistics.html'
         }
       });
     });

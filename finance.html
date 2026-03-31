@@ -47,7 +47,7 @@
 
       --indigo: #5c6bc0;
       --indigo-dark: #3949ab;
-      --indigo-light: rgba(92,107,192,0.12);
+      --indigo-light: rgba(92, 107, 192, 0.12);
     }
 
     [data-theme="dark"] {
@@ -793,36 +793,85 @@
 
     /* ── PIPELINE BANNER ── */
     .pipeline {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 20px 28px;
-      margin-bottom: 28px; overflow-x: auto;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 28px;
+      margin-bottom: 28px;
+      overflow-x: auto;
     }
+
     .pipeline-inner {
-      display: flex; align-items: center; gap: 0;
+      display: flex;
+      align-items: center;
+      gap: 0;
       min-width: 600px;
     }
+
     .pipe-step {
-      display: flex; flex-direction: column; align-items: center;
-      flex: 1; position: relative; cursor: default;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+      position: relative;
+      cursor: default;
     }
+
     .pipe-dot {
-      width: 38px; height: 38px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 15px; font-weight: 700; margin-bottom: 8px;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 8px;
       border: 2px solid var(--border);
-      background: var(--surface2); color: var(--muted);
+      background: var(--surface2);
+      color: var(--muted);
       transition: all 0.3s;
     }
-    .pipe-step.done   .pipe-dot { background: var(--green);  color: #fff; border-color: var(--green); }
-    .pipe-step.active .pipe-dot { background: var(--indigo); color: #fff; border-color: var(--indigo); box-shadow: 0 0 0 4px rgba(92,107,192,0.2); }
-    .pipe-label { font-size: 11px; font-weight: 600; color: var(--muted); text-align: center; }
-    .pipe-step.done   .pipe-label { color: var(--green); }
-    .pipe-step.active .pipe-label { color: var(--indigo); }
-    .pipe-line {
-      flex: 1; height: 2px; background: var(--border);
-      margin-bottom: 22px; transition: background 0.3s;
+
+    .pipe-step.done .pipe-dot {
+      background: var(--green);
+      color: #fff;
+      border-color: var(--green);
     }
-    .pipe-line.done { background: var(--green); }
+
+    .pipe-step.active .pipe-dot {
+      background: var(--indigo);
+      color: #fff;
+      border-color: var(--indigo);
+      box-shadow: 0 0 0 4px rgba(92, 107, 192, 0.2);
+    }
+
+    .pipe-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .pipe-step.done .pipe-label {
+      color: var(--green);
+    }
+
+    .pipe-step.active .pipe-label {
+      color: var(--indigo);
+    }
+
+    .pipe-line {
+      flex: 1;
+      height: 2px;
+      background: var(--border);
+      margin-bottom: 22px;
+      transition: background 0.3s;
+    }
+
+    .pipe-line.done {
+      background: var(--green);
+    }
 
     /* MOBILE */
     @media (max-width: 900px) {
@@ -947,34 +996,34 @@
         </div>
 
         <!-- ORDER PIPELINE -->
-      <div class="pipeline">
-        <div class="pipeline-inner">
-          <div class="pipe-step done">
-            <div class="pipe-dot"><i class="fas fa-cart-shopping"></i></div>
-            <div class="pipe-label">Sales</div>
-          </div>
-          <div class="pipe-line done"></div>
-          <div class="pipe-step active">
-            <div class="pipe-dot"><i class="fas fa-file-invoice-dollar"></i></div>
-            <div class="pipe-label">Finance</div>
-          </div>
-          <div class="pipe-line"></div>
-          <div class="pipe-step">
-            <div class="pipe-dot"><i class="fas fa-boxes-stacked"></i></div>
-            <div class="pipe-label">Procurement</div>
-          </div>
-          <div class="pipe-line"></div>
-          <div class="pipe-step">
-            <div class="pipe-dot"><i class="fas fa-truck-fast"></i></div>
-            <div class="pipe-label">Logistics</div>
-          </div>
-          <div class="pipe-line"></div>
-          <div class="pipe-step" id="finalPipeStep">
-            <div class="pipe-dot"><i class="fas fa-circle-check"></i></div>
-            <div class="pipe-label">Delivered</div>
+        <div class="pipeline">
+          <div class="pipeline-inner">
+            <div class="pipe-step done">
+              <div class="pipe-dot"><i class="fas fa-cart-shopping"></i></div>
+              <div class="pipe-label">Sales</div>
+            </div>
+            <div class="pipe-line done"></div>
+            <div class="pipe-step active">
+              <div class="pipe-dot"><i class="fas fa-file-invoice-dollar"></i></div>
+              <div class="pipe-label">Finance</div>
+            </div>
+            <div class="pipe-line"></div>
+            <div class="pipe-step">
+              <div class="pipe-dot"><i class="fas fa-boxes-stacked"></i></div>
+              <div class="pipe-label">Procurement</div>
+            </div>
+            <div class="pipe-line"></div>
+            <div class="pipe-step">
+              <div class="pipe-dot"><i class="fas fa-truck-fast"></i></div>
+              <div class="pipe-label">Logistics</div>
+            </div>
+            <div class="pipe-line"></div>
+            <div class="pipe-step" id="finalPipeStep">
+              <div class="pipe-dot"><i class="fas fa-circle-check"></i></div>
+              <div class="pipe-label">Delivered</div>
+            </div>
           </div>
         </div>
-      </div>
 
         <!-- Summary Cards -->
         <div class="summary-cards">
@@ -1123,69 +1172,65 @@
 
     function getDemoOrders() {
       return [{
-          id: 101,
+          id: 1,
           poNumber: 'PO-2024-001',
-          item: 'Laptop Computers',
-          quantity: 10,
-          price: 2500,
-          total: 25000,
+          item: 'Sevoflurane',
+          quantity: 1000,
+          price: 985,
+          total: 985000,
           status: 'finance',
-          vendor: 'ABC Electronics',
-          customer: 'Company A',
+          vendor: 'Piramal',
+          customer: 'AB Pharma Ethiopia',
           assignDate: '2024-03-26',
           paymentOption: 'Bank Transfer',
+          pdfBlobUrl: null,
+          createdAt: '2024-03-25',
+
+          // Finance fields
           financeStatus: FINANCE_STATUS.PENDING,
           invoiceNumber: null,
           financeDate: null
         },
         {
-          id: 102,
+          id: 2,
           poNumber: 'PO-2024-002',
-          item: 'Office Chairs',
+          item: 'Isoflurane',
           quantity: 25,
           price: 450,
           total: 11250,
-          status: 'finance',
-          vendor: 'Tech Solutions LLC',
-          customer: 'Company B',
+          status: 'procurement',
+          vendor: 'Piramal',
+          customer: 'BC Pharma',
           assignDate: '2024-03-27',
           paymentOption: 'Advance Payment',
+          pdfBlobUrl: null,
+          createdAt: '2024-03-26',
+
+          // Finance fields
           financeStatus: FINANCE_STATUS.INVOICED,
           invoiceNumber: 'INV-2024-001',
           financeDate: '2024-03-28'
         },
         {
-          id: 103,
-          poNumber: 'PO-2024-005',
-          item: 'Server Racks',
-          quantity: 3,
-          price: 8500,
-          total: 25500,
-          status: 'procurement',
-          vendor: 'Global Traders FZE',
-          customer: 'Wholesale Corp',
-          assignDate: '2024-03-29',
-          paymentOption: 'LC',
-          financeStatus: FINANCE_STATUS.FORWARDED,
-          invoiceNumber: 'INV-2024-002',
-          financeDate: '2024-03-30'
-        },
-        {
-          id: 104,
-          poNumber: 'PO-2024-006',
-          item: 'Network Switches',
-          quantity: 8,
-          price: 1800,
-          total: 14400,
-          status: 'finance',
-          vendor: 'Sarah Ahmed',
-          customer: 'Retail Store 1',
-          assignDate: '2024-03-30',
-          paymentOption: 'COD',
+          id: 3,
+          poNumber: 'PO-2024-003',
+          item: 'Arthramid',
+          quantity: 5,
+          price: 1200,
+          total: 6000,
+          status: 'sales',
+          vendor: null,
+          customer: null,
+          assignDate: null,
+          paymentOption: null,
+          pdfBlobUrl: null,
+          createdAt: '2024-03-28',
+
+          // Finance fields
           financeStatus: FINANCE_STATUS.PENDING,
           invoiceNumber: null,
           financeDate: null
-        },
+        }
       ];
     }
 
