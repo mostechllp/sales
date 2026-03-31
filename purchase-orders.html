@@ -1313,6 +1313,7 @@
 
     let savedTheme = localStorage.getItem('sales-theme') || 'light';
     setTheme(savedTheme);
+    localStorage.removeItem('sales_purchase_orders');
     loadData();
     renderPurchaseOrders();
 
